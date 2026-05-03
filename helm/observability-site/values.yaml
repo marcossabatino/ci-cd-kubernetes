@@ -1,0 +1,168 @@
+# Default values for observability-site
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Environment (dev or prod)
+environment: dev
+
+# Replica configuration
+replicaCount: 2
+
+# Image configuration
+image:
+  repository: observability-site
+  tag: latest
+  pullPolicy: Never  # Never pull (use local minikube image)
+
+# Container port
+containerPort: 80
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: 50m
+    memory: 32Mi
+    ephemeralStorage: 100Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+    ephemeralStorage: 500Mi
+
+# Service configuration
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+  name: observability-site-svc
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "10"
+  hosts:
+    - host: observability.local
+      paths:
+        - path: /
+          pathType: Prefix
+  defaultBackend:
+    service:
+      name: observability-site-svc
+      port:
+        number: 80
+
+# Health probes configuration
+probes:
+  liveness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startup:
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6  # 30s max startup
+
+# Deployment strategy
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+# Security context
+securityContext:
+  pod:
+    runAsNonRoot: false
+  container:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+    runAsNonRoot: false
+
+# Pod affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - observability-site
+          topologyKey: kubernetes.io/hostname
+
+# Node selector
+nodeSelector:
+  kubernetes.io/os: linux
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    cpu:
+      targetAverageUtilization: 70
+    memory:
+      targetAverageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+
+# Namespace
+namespace: observability
+
+# Labels
+labels:
+  app: observability-site
+  component: web
+  version: v1
+
+# ConfigMap data
+configMap:
+  enabled: true
+  data: {}
+
+# Pod lifecycle hooks
+lifecycle:
+  preStop:
+    sleep: 15
+
+# DNS policy
+dnsPolicy: ClusterFirst
+
+# Restart policy
+restartPolicy: Always
+terminationGracePeriodSeconds: 30

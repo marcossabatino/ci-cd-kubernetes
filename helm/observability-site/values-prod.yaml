@@ -1,0 +1,129 @@
+# Production values for observability-site
+# Override defaults for production deployment
+
+environment: prod
+
+# More replicas in production
+replicaCount: 3
+
+# Production image settings
+image:
+  pullPolicy: IfNotPresent  # Pull from registry
+
+# Higher resource limits for production
+resources:
+  requests:
+    cpu: 200m
+    memory: 64Mi
+    ephemeralStorage: 200Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+    ephemeralStorage: 1Gi
+
+# Service with stricter configuration
+service:
+  type: ClusterIP
+  port: 80
+
+# Ingress for production domain
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/limit-rps: "200"
+    nginx.ingress.kubernetes.io/limit-connections: "20"
+  hosts:
+    - host: observability.io  # Production domain
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: observability-tls
+      hosts:
+        - observability.io
+
+# Aggressive HPA for production
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    cpu:
+      targetAverageUtilization: 60
+    memory:
+      targetAverageUtilization: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+        - type: Pods
+          value: 3
+          periodSeconds: 30
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+
+# Production namespace (can be isolated)
+namespace: observability-prod
+
+# Stricter security context for production
+securityContext:
+  pod:
+    runAsNonRoot: false
+    fsGroup: 101
+  container:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 101
+
+# Pod affinity for high availability
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - observability-site
+        topologyKey: kubernetes.io/hostname
+
+# Node selection for production
+nodeSelector:
+  kubernetes.io/os: linux
+  production: "true"
+
+# Longer termination grace period for production
+terminationGracePeriodSeconds: 60
+
+# Health probes tuned for production
+probes:
+  liveness:
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+  startup:
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 6
