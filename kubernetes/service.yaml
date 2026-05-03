@@ -1,0 +1,62 @@
+---
+# Service for the main website
+apiVersion: v1
+kind: Service
+metadata:
+  name: observability-site-svc
+  namespace: observability
+  labels:
+    app: observability-site
+    component: web
+  annotations:
+    description: "ClusterIP service for observability-site deployment"
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service for DNS SRV records
+  selector:
+    app: observability-site
+    tier: web
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  sessionAffinity: None
+
+---
+# Service for Prometheus
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-svc
+  namespace: observability
+  labels:
+    app: prometheus
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+  ports:
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: http
+
+---
+# Service for Grafana
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-svc
+  namespace: observability
+  labels:
+    app: grafana
+spec:
+  type: ClusterIP
+  selector:
+    app: grafana
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http

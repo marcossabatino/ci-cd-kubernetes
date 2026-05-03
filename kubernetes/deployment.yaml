@@ -1,0 +1,267 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: observability-site
+  namespace: observability
+  labels:
+    app: observability-site
+    version: v1
+    component: web
+  annotations:
+    description: "Observability Portal - Static site on Kubernetes"
+    image.policy: "always"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero-downtime deployments
+  selector:
+    matchLabels:
+      app: observability-site
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: observability-site
+        tier: web
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+        prometheus.io/path: "/nginx_status"
+    spec:
+      # Pod security context
+      securityContext:
+        runAsNonRoot: false
+        fsGroup: 101
+
+      # Init containers (if needed in future)
+      initContainers: []
+
+      # Main containers
+      containers:
+      - name: nginx
+        image: observability-site:latest
+        imagePullPolicy: Never  # Use local image (minikube)
+
+        # Ports
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+
+        # Environment variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: observability-config
+
+        # Resource requests and limits
+        resources:
+          requests:
+            cpu: 50m              # Minimum CPU needed
+            memory: 32Mi          # Minimum memory needed
+            ephemeral-storage: 100Mi
+          limits:
+            cpu: 200m             # Maximum CPU allowed
+            memory: 128Mi         # Maximum memory allowed
+            ephemeral-storage: 500Mi
+
+        # Liveness Probe - checks if container should be restarted
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10    # Wait 10s before first check
+          periodSeconds: 10          # Check every 10s
+          timeoutSeconds: 5          # 5s timeout
+          successThreshold: 1        # Consider healthy after 1 success
+          failureThreshold: 3        # Restart after 3 failures
+
+        # Readiness Probe - checks if container is ready for traffic
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 5     # Wait 5s before first check
+          periodSeconds: 5           # Check every 5s
+          timeoutSeconds: 3          # 3s timeout
+          successThreshold: 1        # Consider ready after 1 success
+          failureThreshold: 3        # Remove from endpoints after 3 failures
+
+        # Startup Probe - gives time for app to start
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 30       # Allow 30 * 5s = 150s to start
+
+        # Volume mounts
+        volumeMounts:
+        - name: nginx-cache
+          mountPath: /var/cache/nginx
+        - name: nginx-run
+          mountPath: /var/run/nginx
+
+        # Security context for container
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - NET_BIND_SERVICE
+
+        # Lifecycle hooks
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+
+      # Pod-level settings
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+
+      # Volumes
+      volumes:
+      - name: nginx-cache
+        emptyDir:
+          medium: Memory
+          sizeLimit: 100Mi
+      - name: nginx-run
+        emptyDir:
+          medium: Memory
+          sizeLimit: 50Mi
+
+      # Affinity rules (optional but recommended)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - observability-site
+              topologyKey: kubernetes.io/hostname
+
+      # Node selector (optional)
+      nodeSelector:
+        kubernetes.io/os: linux
+
+      # DNS policy
+      dnsPolicy: ClusterFirst
+
+---
+# Deployment for Prometheus
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: observability
+  labels:
+    app: prometheus
+    component: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        ports:
+        - containerPort: 9090
+          name: http
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: 9090
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: 9090
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Deployment for Grafana
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: observability
+  labels:
+    app: grafana
+    component: visualization
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: GF_SECURITY_ADMIN_USER
+          value: admin
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: admin
+        - name: GF_INSTALL_PLUGINS
+          value: grafana-piechart-panel
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5

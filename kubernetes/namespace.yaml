@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    name: observability
+    environment: development
+  annotations:
+    description: "Observability Portal - Educational site on Logs, Traces, and Metrics"

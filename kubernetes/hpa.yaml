@@ -1,0 +1,103 @@
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: observability-site-hpa
+  namespace: observability
+  labels:
+    app: observability-site
+    component: autoscaling
+  annotations:
+    description: "Auto-scale observability-site based on CPU and memory"
+spec:
+  # Target the deployment
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: observability-site
+
+  # Scaling bounds
+  minReplicas: 2    # Always have at least 2 pods
+  maxReplicas: 10   # Never exceed 10 pods
+
+  # Metrics for scaling
+  metrics:
+  # Scale on CPU utilization
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70    # Scale up if avg CPU > 70%
+
+  # Scale on Memory utilization
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80    # Scale up if avg memory > 80%
+
+  # Behavior (optional but good practice)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100                # Double the number of replicas
+        periodSeconds: 60
+      - type: Pods
+        value: 2                  # Add 2 pods at a time
+        periodSeconds: 60
+      selectPolicy: Max           # Use whichever scales up more
+
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      policies:
+      - type: Percent
+        value: 50                 # Scale down to 50% if needed
+        periodSeconds: 60
+
+---
+# HPA for Prometheus (light scaling)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: prometheus-hpa
+  namespace: observability
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: prometheus
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# HPA for Grafana (light scaling)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: grafana-hpa
+  namespace: observability
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: grafana
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
