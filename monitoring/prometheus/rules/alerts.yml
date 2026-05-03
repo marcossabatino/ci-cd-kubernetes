@@ -1,0 +1,71 @@
+groups:
+  - name: observability_portal
+    interval: 30s
+    rules:
+      # ========================================
+      # Website Availability
+      # ========================================
+      - alert: WebsiteDown
+        expr: up{job="nginx-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: observability-site
+        annotations:
+          summary: "Website is down"
+          description: "Nginx exporter is not responding for > 2 minutes"
+
+      - alert: WebsiteHighErrorRate
+        expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: observability-site
+        annotations:
+          summary: "High error rate detected"
+          description: "Website error rate is {{ $value | humanizePercentage }}"
+
+      # ========================================
+      # Performance
+      # ========================================
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: observability-site
+        annotations:
+          summary: "High latency detected"
+          description: "P95 latency is {{ $value | humanizeDuration }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Available memory is below 20%"
+
+      # ========================================
+      # Traffic
+      # ========================================
+      - alert: UnusuallyHighTraffic
+        expr: rate(nginx_http_requests_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: info
+          service: observability-site
+        annotations:
+          summary: "Unusually high traffic"
+          description: "Request rate is {{ $value | humanize }} req/s"
+
+      - alert: NoTraffic
+        expr: increase(nginx_http_requests_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: observability-site
+        annotations:
+          summary: "No traffic for 10 minutes"
+          description: "Website may be unreachable"
