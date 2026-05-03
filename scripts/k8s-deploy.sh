@@ -115,6 +115,15 @@ print_header "Creating Kubernetes Namespace"
 kubectl create namespace observability --dry-run=client -o yaml | kubectl apply -f -
 print_success "Namespace 'observability' ready"
 
+# Wait for ingress-nginx controller to be ready
+print_header "Waiting for Ingress Controller"
+
+echo "Waiting for nginx ingress controller to be ready..."
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s 2>/dev/null || print_warning "Ingress controller not fully ready (will retry ingress later)"
+
 # Apply Kubernetes manifests
 print_header "Applying Kubernetes Manifests"
 
@@ -129,8 +138,30 @@ echo "  5. HPA"
 for manifest in kubernetes/configmap.yaml kubernetes/deployment.yaml kubernetes/service.yaml kubernetes/ingress.yaml kubernetes/hpa.yaml; do
   if [ -f "$manifest" ]; then
     echo "Applying $manifest..."
-    kubectl apply -f "$manifest"
-    print_success "Applied $(basename $manifest)"
+
+    # Retry logic for ingress (webhook may not be ready initially)
+    if [[ "$manifest" == *"ingress.yaml"* ]]; then
+      max_retries=5
+      retry_count=0
+      while [ $retry_count -lt $max_retries ]; do
+        if kubectl apply -f "$manifest" 2>&1; then
+          print_success "Applied $(basename $manifest)"
+          break
+        else
+          retry_count=$((retry_count + 1))
+          if [ $retry_count -lt $max_retries ]; then
+            print_warning "Ingress webhook not ready, retrying in 5s... (attempt $retry_count/$max_retries)"
+            sleep 5
+          else
+            print_error "Failed to apply ingress after $max_retries attempts"
+            exit 1
+          fi
+        fi
+      done
+    else
+      kubectl apply -f "$manifest"
+      print_success "Applied $(basename $manifest)"
+    fi
   fi
 done
 
