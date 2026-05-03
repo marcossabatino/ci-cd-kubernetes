@@ -6,25 +6,51 @@ Guia para deployar o Observability Portal em Kubernetes local (minikube).
 
 - Minikube 1.32+
 - kubectl 1.28+
-- Docker ou similar (minikube driver)
+- QEMU (padrão) ou Docker/KVM (alternativas)
 - 4+ CPUs disponíveis
 - 8GB+ de RAM disponível
 
-Verificar:
+**Para QEMU (padrão):**
+```bash
+# Fedora/RHEL
+sudo dnf install qemu-system-x86_64 qemu-utils libvirt
+
+# Ubuntu/Debian
+sudo apt install qemu-system-x86-64 qemu-utils libvirt-daemon
+```
+
+**Para Docker (alternativa):**
+```bash
+docker --version
+```
+
+Verificar instalação:
 ```bash
 minikube version
 kubectl version --client
-docker version
+qemu-system-x86_64 --version
 ```
 
 ## 🚀 Deployment Rápido (Um Comando)
 
+**Com QEMU (padrão):**
+```bash
+make k8s-deploy
+```
+
+**Com Docker (alternativa):**
+```bash
+make k8s-deploy-docker
+```
+
+**Ou direto:**
 ```bash
 ./scripts/k8s-deploy.sh
+MINIKUBE_DRIVER=docker ./scripts/k8s-deploy.sh  # Com Docker
 ```
 
 Isso vai:
-1. ✅ Iniciar minikube
+1. ✅ Iniciar minikube com QEMU
 2. ✅ Build imagem Docker em minikube
 3. ✅ Create namespace
 4. ✅ Apply all manifests
@@ -264,6 +290,34 @@ Você verá:
 - Load distribuir entre pods
 
 ## 🔧 Troubleshooting
+
+### QEMU não encontrado
+```bash
+# Verificar se QEMU está instalado
+qemu-system-x86_64 --version
+
+# Instalar QEMU (Fedora)
+sudo dnf install qemu-system-x86_64
+
+# Instalar QEMU (Ubuntu/Debian)
+sudo apt install qemu-system-x86-64
+
+# Usar Docker como alternativa
+MINIKUBE_DRIVER=docker make k8s-deploy
+```
+
+### QEMU muito lento
+Se QEMU estiver muito lento:
+```bash
+# Verificar se KVM está disponível (aceleração de hardware)
+grep -c "^processor" /proc/cpuinfo  # Deve ser > 4
+
+# Mudar para KVM se disponível
+MINIKUBE_DRIVER=kvm2 make k8s-deploy
+
+# Ou voltar para Docker
+MINIKUBE_DRIVER=docker make k8s-deploy
+```
 
 ### Pods não iniciam
 ```bash

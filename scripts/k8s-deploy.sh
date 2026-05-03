@@ -19,7 +19,7 @@ NC='\033[0m'
 MINIKUBE_PROFILE=${MINIKUBE_PROFILE:-"minikube"}
 MINIKUBE_CPUS=${MINIKUBE_CPUS:-"4"}
 MINIKUBE_MEMORY=${MINIKUBE_MEMORY:-"8192"}
-MINIKUBE_DRIVER=${MINIKUBE_DRIVER:-"docker"}
+MINIKUBE_DRIVER=${MINIKUBE_DRIVER:-"qemu"}
 
 # Functions
 print_header() {
@@ -59,6 +59,15 @@ if ! command -v kubectl &> /dev/null; then
   exit 1
 fi
 print_success "kubectl found: $(kubectl version --client --short)"
+
+if [ "$MINIKUBE_DRIVER" = "qemu" ]; then
+  if ! command -v qemu-system-x86_64 &> /dev/null; then
+    print_error "QEMU is not installed"
+    echo "Install: sudo apt install qemu-system-x86-64 qemu-utils"
+    exit 1
+  fi
+  print_success "QEMU found: $(qemu-system-x86_64 --version | head -1)"
+fi
 
 # Start minikube
 print_header "Starting Minikube"

@@ -1,5 +1,5 @@
 .PHONY: help build docker-up docker-down docker-logs \
-        k8s-deploy k8s-down k8s-logs k8s-scale k8s-shell \
+        k8s-deploy k8s-deploy-docker k8s-down k8s-logs k8s-scale k8s-shell \
         test-site test-perf clean
 
 SHELL := /bin/bash
@@ -50,10 +50,15 @@ docker-ps: ## Show running containers
 # Kubernetes Commands
 # ========================================
 
-k8s-deploy: ## Deploy to Kubernetes (minikube)
-	@echo "$(BLUE)Deploying to Kubernetes...$(NC)"
+k8s-deploy: ## Deploy to Kubernetes (minikube with QEMU)
+	@echo "$(BLUE)Deploying to Kubernetes with QEMU driver...$(NC)"
 	chmod +x scripts/k8s-deploy.sh
 	./scripts/k8s-deploy.sh
+
+k8s-deploy-docker: ## Deploy to Kubernetes using Docker driver instead
+	@echo "$(BLUE)Deploying to Kubernetes with Docker driver...$(NC)"
+	chmod +x scripts/k8s-deploy.sh
+	MINIKUBE_DRIVER=docker ./scripts/k8s-deploy.sh
 
 k8s-down: ## Remove all Kubernetes resources
 	@echo "$(YELLOW)Deleting namespace observability...$(NC)"
