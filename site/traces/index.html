@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distributed Tracing — Observability Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">📊 Observability</div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/logs/">Logs</a></li>
+        <li><a href="/metrics/">Métricas</a></li>
+        <li><a href="/traces/" class="active">Traces</a></li>
+        <li><a href="/sre/">SRE</a></li>
+        <li><a href="/architecture/">Arquitetura</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+  </nav>
+
+  <header class="section-hero">
+    <div class="container">
+      <h1>🔗 Distributed Tracing: Seguindo o Caminho</h1>
+      <p>Rastreie uma requisição através de todos os seus microsserviços</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="content-section">
+      <h2>O que é Distributed Tracing?</h2>
+      <p>
+        <strong>Distributed tracing</strong> permite que você rastreie uma requisição única conforme ela percorre
+        múltiplos serviços, bancos de dados e dependências. Você vê:
+      </p>
+      <ul class="feature-list">
+        <li>📍 <strong>Quais serviços foram chamados</strong> em qual ordem</li>
+        <li>⏱️ <strong>Quanto tempo</strong> cada um levou</li>
+        <li>❌ <strong>Onde falhou</strong> (se falhou)</li>
+        <li>🔗 <strong>Dependências</strong> entre serviços</li>
+        <li>📊 <strong>Bottlenecks</strong> no fluxo</li>
+      </ul>
+    </section>
+
+    <section class="content-section">
+      <h2>Exemplo: Uma Requisição em Microsserviços</h2>
+      <p>
+        Imagine que um usuário tenta comprar um item:
+      </p>
+      <div class="trace-flow">
+        <div class="trace-step" style="width: 10%;">
+          <h4>API Gateway</h4>
+          <code>50ms</code>
+        </div>
+        <div class="trace-arrow">→</div>
+        <div class="trace-step" style="width: 20%;">
+          <h4>User Service</h4>
+          <code>150ms</code>
+        </div>
+        <div class="trace-arrow">→</div>
+        <div class="trace-step" style="width: 15%;">
+          <h4>Inventory</h4>
+          <code>120ms</code>
+        </div>
+        <div class="trace-arrow">→</div>
+        <div class="trace-step" style="width: 25%;">
+          <h4>Payment</h4>
+          <code>300ms ⚠️</code>
+        </div>
+        <div class="trace-arrow">→</div>
+        <div class="trace-step" style="width: 15%;">
+          <h4>Order DB</h4>
+          <code>80ms</code>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 20px;">
+        <strong>Total: ~700ms</strong> | Bottleneck: Payment Service (300ms = 43%)
+      </p>
+    </section>
+
+    <section class="content-section">
+      <h2>Conceitos Principais</h2>
+      <div class="concepts-grid">
+        <div class="concept-card">
+          <h3>Trace ID</h3>
+          <p>
+            Identificador único para uma requisição do início ao fim.
+            Todos os serviços usam o mesmo <code>trace_id</code>.
+          </p>
+          <code>trace_id: "abc123def456"</code>
+        </div>
+
+        <div class="concept-card">
+          <h3>Span</h3>
+          <p>
+            Um "pedaço" da requisição — um serviço, operação ou query.
+            Cada span tem início, fim e metadados.
+          </p>
+          <code>span_id: "span_1", duration: 150ms</code>
+        </div>
+
+        <div class="concept-card">
+          <h3>Parent-Child Relationship</h3>
+          <p>
+            Spans formam uma árvore. Se serviço A chama B que chama C:
+          </p>
+          <code>A → B (parent) → C (child)</code>
+        </div>
+
+        <div class="concept-card">
+          <h3>Instrumentação</h3>
+          <p>
+            Código que cria spans e propaga <code>trace_id</code>.
+            Feito via bibliotecas (OpenTelemetry, Jaeger SDK).
+          </p>
+          <code>tracer.startSpan("getUserData")</code>
+        </div>
+
+        <div class="concept-card">
+          <h3>Baggage</h3>
+          <p>
+            Contexto que viaja com a requisição entre serviços.
+            Ex: <code>user_id</code>, <code>request_id</code>.
+          </p>
+          <code>baggage: { user_id: "123", tenant: "acme" }</code>
+        </div>
+
+        <div class="concept-card">
+          <h3>Sampling</h3>
+          <p>
+            Não rastreie TUDO (muito caro). Amostre 10% ou trace erros sempre.
+          </p>
+          <code>sampler: { type: "probabilistic", param: 0.1 }</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>OpenTelemetry: Padrão Open Source</h2>
+      <p>
+        <strong>OpenTelemetry</strong> (OTel) é o padrão emergente para observabilidade. Fornece:
+      </p>
+      <ul class="feature-list">
+        <li>✅ SDKs para todas as linguagens</li>
+        <li>✅ Padrão unificado (logs, métricas, traces)</li>
+        <li>✅ Compatível com Jaeger, Zipkin, Datadog, etc</li>
+        <li>✅ Sem vendor lock-in</li>
+      </ul>
+      <p style="margin-top: 20px;">
+        Diferente de antes (cada ferramenta tinha seu SDK), agora você instrumenta uma vez com OTel
+        e exporta para qualquer backend.
+      </p>
+    </section>
+
+    <section class="content-section">
+      <h2>Ferramentas de Tracing</h2>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h3>Jaeger</h3>
+          <p>Open source, da Uber. Excelente UI, muito usado</p>
+          <code>docker run jaegertracing/all-in-one</code>
+        </div>
+        <div class="tool-card">
+          <h3>Zipkin</h3>
+          <p>Pioneer em distributed tracing. Simples, estável</p>
+          <code>docker run openzipkin/zipkin</code>
+        </div>
+        <div class="tool-card">
+          <h3>OpenTelemetry</h3>
+          <p>Padrão aberto. Funciona com qualquer backend</p>
+          <code>npm install @opentelemetry/api</code>
+        </div>
+        <div class="tool-card">
+          <h3>Datadog APM</h3>
+          <p>Profissional, pago. Melhor UX, correlação automática</p>
+          <code>gem install ddtrace</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Exemplo: Instrumentação com OpenTelemetry</h2>
+      <div class="code-block">
+        <pre><code class="language-javascript">import { NodeTracerProvider } from '@opentelemetry/node';
+import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+
+const jaegerExporter = new JaegerExporter({
+  endpoint: 'http://localhost:14268/api/traces',
+});
+
+const tracerProvider = new NodeTracerProvider();
+tracerProvider.addSpanProcessor(
+  new SimpleSpanProcessor(jaegerExporter)
+);
+tracerProvider.register();
+
+// Uso em uma rota
+app.get('/api/users/:id', async (req, res) => {
+  const tracer = trace.getTracer('api-service');
+
+  const span = tracer.startSpan('getUser');
+  try {
+    const user = await db.query('SELECT * FROM users WHERE id = ?', [req.params.id]);
+    span.setAttributes({ user_id: user.id, status: 'success' });
+    res.json(user);
+  } catch (err) {
+    span.recordException(err);
+    span.setStatus({ code: SpanStatusCode.ERROR });
+  } finally {
+    span.end();
+  }
+});
+</code></pre>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Melhores Práticas</h2>
+      <div class="best-practices">
+        <div class="practice-card">
+          <h3>1️⃣ Correlacione Tudo</h3>
+          <p>Use o mesmo <code>trace_id</code> em logs, métricas e traces:</p>
+          <code>{ trace_id: "abc123", span_id: "s1", userId: "123" }</code>
+        </div>
+
+        <div class="practice-card">
+          <h3>2️⃣ Amostragem Inteligente</h3>
+          <p>Rastreie 100% dos erros, 10% de sucessos (economize custo)</p>
+          <code>sampler: { errors: 1.0, successes: 0.1 }</code>
+        </div>
+
+        <div class="practice-card">
+          <h3>3️⃣ Nomeie Spans Bem</h3>
+          <p>Nomes descritivos e consistentes ajudam análise</p>
+          <code>db.query, http.request, cache.get (não: "operation")</code>
+        </div>
+
+        <div class="practice-card">
+          <h3>4️⃣ Adicione Atributos Úteis</h3>
+          <p>Contexto facilita debugging</p>
+          <code>{ http.status_code, db.statement, user_id }</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="navigation-section">
+      <div class="nav-buttons">
+        <a href="/metrics/" class="btn btn-secondary">← Métricas</a>
+        <a href="/sre/" class="btn btn-primary">Próximo: SRE →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Marcos Sabatino | Observability Portal</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

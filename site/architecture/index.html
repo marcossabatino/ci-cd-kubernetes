@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquitetura — Observability Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">📊 Observability</div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/logs/">Logs</a></li>
+        <li><a href="/metrics/">Métricas</a></li>
+        <li><a href="/traces/">Traces</a></li>
+        <li><a href="/sre/">SRE</a></li>
+        <li><a href="/architecture/" class="active">Arquitetura</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+  </nav>
+
+  <header class="section-hero">
+    <div class="container">
+      <h1>🏗️ Arquitetura: Como Este Site é Deployado</h1>
+      <p>Demonstração prática de observabilidade, Kubernetes e DevOps</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="content-section">
+      <h2>Stack Completo</h2>
+      <p>Este site educacional é deployado usando a mesma stack que você aprendeu:</p>
+      <ul class="feature-list">
+        <li>📦 <strong>Docker</strong> — Site em container</li>
+        <li>☸️ <strong>Kubernetes</strong> — Orquestração e auto-healing</li>
+        <li>🗺️ <strong>Terraform</strong> — Infraestrutura como código</li>
+        <li>🔄 <strong>GitHub Actions</strong> — CI/CD automático</li>
+        <li>📊 <strong>Prometheus</strong> — Métricas em tempo real</li>
+        <li>📈 <strong>Grafana</strong> — Dashboards bonitos</li>
+        <li>📝 <strong>Loki</strong> — Agregação de logs</li>
+      </ul>
+    </section>
+
+    <section class="content-section">
+      <h2>Diagrama da Arquitetura</h2>
+      <div class="architecture-diagram">
+        <div class="diagram-section">
+          <h3>CI/CD Pipeline</h3>
+          <div class="diagram-flow">
+            <div class="box">Git Push</div>
+            <span>→</span>
+            <div class="box">GitHub Actions</div>
+            <span>→</span>
+            <div class="box">Docker Build</div>
+            <span>→</span>
+            <div class="box">Push to Registry</div>
+          </div>
+        </div>
+
+        <div class="diagram-section">
+          <h3>Infraestrutura (Kubernetes)</h3>
+          <div class="diagram-flow">
+            <div class="box">Nginx Container</div>
+            <span>→</span>
+            <div class="box">Pod (x2)</div>
+            <span>→</span>
+            <div class="box">Service</div>
+            <span>→</span>
+            <div class="box">Ingress</div>
+          </div>
+          <p style="text-align: center; margin-top: 10px; font-size: 0.9em;">
+            Kubernetes escalona automaticamente (HPA: 2-10 réplicas)
+          </p>
+        </div>
+
+        <div class="diagram-section">
+          <h3>Observabilidade</h3>
+          <div class="diagram-flow">
+            <div class="box">Nginx Logs</div>
+            <span>↘</span>
+            <div class="box-split">
+              <div>Loki</div>
+              <div>Prometheus</div>
+            </div>
+            <span>→</span>
+            <div class="box">Grafana</div>
+            <span>→</span>
+            <div class="box">Dashboard</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Como o Site é Observável</h2>
+      <p>
+        Este site não é apenas sobre observabilidade — <strong>é observável</strong>.
+        Enquanto você lê, sua requisição está sendo:
+      </p>
+      <div class="observability-flow">
+        <div class="flow-card">
+          <h3>1. Request chega no Nginx</h3>
+          <p>Access log registrado em JSON</p>
+          <code>{ timestamp, status, latency, path, bytes }</code>
+        </div>
+
+        <div class="flow-card">
+          <h3>2. Loki agrega logs</h3>
+          <p>Logs buscáveis no Grafana</p>
+          <code>{ job="nginx", status="200" }</code>
+        </div>
+
+        <div class="flow-card">
+          <h3>3. Prometheus scrapa métricas</h3>
+          <p>Nginx exporter expõe métricas</p>
+          <code>http_requests_total, request_duration_seconds</code>
+        </div>
+
+        <div class="flow-card">
+          <h3>4. Grafana visualiza</h3>
+          <p>Dashboard mostra em tempo real</p>
+          <code>Requests/sec, Latency p99, Error rate</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Tecnologias Usadas</h2>
+      <table class="tech-table">
+        <tr>
+          <th>Camada</th>
+          <th>Tecnologia</th>
+          <th>Função</th>
+        </tr>
+        <tr>
+          <td><strong>Frontend</strong></td>
+          <td>HTML5 + CSS3 + Vanilla JS</td>
+          <td>Site estático</td>
+        </tr>
+        <tr>
+          <td><strong>Web Server</strong></td>
+          <td>Nginx</td>
+          <td>Servir conteúdo estático + cache</td>
+        </tr>
+        <tr>
+          <td><strong>Container</strong></td>
+          <td>Docker (Alpine)</td>
+          <td>Imagem otimizada (~30MB)</td>
+        </tr>
+        <tr>
+          <td><strong>Orquestração</strong></td>
+          <td>Kubernetes</td>
+          <td>Auto-scaling, health checks, rolling updates</td>
+        </tr>
+        <tr>
+          <td><strong>IaC</strong></td>
+          <td>Terraform + Helm</td>
+          <td>Infraestrutura versionada</td>
+        </tr>
+        <tr>
+          <td><strong>CI/CD</strong></td>
+          <td>GitHub Actions</td>
+          <td>Build, test, deploy automático</td>
+        </tr>
+        <tr>
+          <td><strong>Logs</strong></td>
+          <td>Loki + Promtail</td>
+          <td>Agregação e busca</td>
+        </tr>
+        <tr>
+          <td><strong>Métricas</strong></td>
+          <td>Prometheus + nginx_exporter</td>
+          <td>Time-series e alerting</td>
+        </tr>
+        <tr>
+          <td><strong>Visualização</strong></td>
+          <td>Grafana</td>
+          <td>Dashboards interativos</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="content-section">
+      <h2>Fluxo de Deploy</h2>
+      <ol class="deployment-flow">
+        <li>
+          <strong>Você faz push para GitHub</strong>
+          <p>Commit na branch main triggers GitHub Actions</p>
+        </li>
+        <li>
+          <strong>CI roda testes/lint</strong>
+          <p>Valida HTML, otimiza assets</p>
+        </li>
+        <li>
+          <strong>Docker build</strong>
+          <p>Cria imagem Nginx com site inside</p>
+        </li>
+        <li>
+          <strong>Push para Docker Registry</strong>
+          <p>Imagem fica disponível para download</p>
+        </li>
+        <li>
+          <strong>Kubernetes aplica nova imagem</strong>
+          <p>Rolling update: pod antigo → novo, sem downtime</p>
+        </li>
+        <li>
+          <strong>Health checks validam</strong>
+          <p>Readiness probe: novo pod pronto? Se não, rollback</p>
+        </li>
+        <li>
+          <strong>Tráfego passa para novo pod</strong>
+          <p>Load balancer redireciona requisições</p>
+        </li>
+        <li>
+          <strong>Métricas atualizam em tempo real</strong>
+          <p>Grafana mostra o deploy em ação</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="content-section">
+      <h2>Métricas Monitoradas</h2>
+      <div class="metrics-dashboard">
+        <div class="metric-item">
+          <h4>📊 Requisições por segundo</h4>
+          <code>rate(http_requests_total[1m])</code>
+          <p>Tráfego em tempo real</p>
+        </div>
+        <div class="metric-item">
+          <h4>⏱️ Latência P95</h4>
+          <code>histogram_quantile(0.95, request_duration_seconds)</code>
+          <p>95% das requisições mais rápidas que</p>
+        </div>
+        <div class="metric-item">
+          <h4>❌ Taxa de erro</h4>
+          <code>rate(http_requests_total{status=~'5..'}[5m])</code>
+          <p>% de requisições que falharam</p>
+        </div>
+        <div class="metric-item">
+          <h4>⬆️ Uptime</h4>
+          <code>up{job="nginx-site"}</code>
+          <p>1 = up, 0 = down</p>
+        </div>
+        <div class="metric-item">
+          <h4>💾 Bytes trafegados</h4>
+          <code>rate(http_response_size_bytes[5m])</code>
+          <p>Banda utilizada</p>
+        </div>
+        <div class="metric-item">
+          <h4>🔄 Cache hit rate</h4>
+          <code>cache_hits / cache_total</code>
+          <p>% de requisições servidas do cache</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Código do Projeto</h2>
+      <p>
+        Toda a implementação está no GitHub. Estrutura:
+      </p>
+      <div class="code-structure">
+        <pre><code>site/                    ← Site estático
+  ├── index.html
+  ├── logs/, metrics/, traces/, sre/
+  ├── css/style.css
+  └── js/main.js
+
+kubernetes/              ← Manifests K8s
+  ├── deployment.yaml
+  ├── service.yaml
+  ├── ingress.yaml
+  └── hpa.yaml
+
+helm/                    ← Helm chart
+  └── observability-site/
+
+terraform/               ← IaC
+  ├── modules/vpc/
+  └── main.tf
+
+.github/workflows/       ← CI/CD
+  ├── ci.yml
+  └── cd.yml
+
+monitoring/              ← Prometheus, Grafana, Loki
+  ├── prometheus.yml
+  └── grafana/
+
+docker/
+  ├── Dockerfile
+  └── nginx.conf</code></pre>
+      </div>
+      <p style="text-align: center; margin-top: 20px;">
+        👉 <a href="https://github.com/marcossabatino/ci-cd-kubernetes" target="_blank">Ver no GitHub</a>
+      </p>
+    </section>
+
+    <section class="navigation-section">
+      <div class="nav-buttons">
+        <a href="/sre/" class="btn btn-secondary">← SRE</a>
+        <a href="/" class="btn btn-primary">Voltar ao Home</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Marcos Sabatino | Observability Portal</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

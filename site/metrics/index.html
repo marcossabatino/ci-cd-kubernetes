@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Métricas — Observability Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">📊 Observability</div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/logs/">Logs</a></li>
+        <li><a href="/metrics/" class="active">Métricas</a></li>
+        <li><a href="/traces/">Traces</a></li>
+        <li><a href="/sre/">SRE</a></li>
+        <li><a href="/architecture/">Arquitetura</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+  </nav>
+
+  <header class="section-hero">
+    <div class="container">
+      <h1>📈 Métricas: Medindo a Saúde</h1>
+      <p>Números que indicam como seu sistema está se comportando</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="content-section">
+      <h2>O que é uma Métrica?</h2>
+      <p>
+        Uma <strong>métrica</strong> é uma medição quantitativa de um aspecto do seu sistema em um ponto do tempo.
+        Diferente de logs (eventos discretos), métricas são números contínuos que você coleta, armazena e analisa.
+      </p>
+      <p>Exemplos:</p>
+      <ul class="feature-list">
+        <li><code>http_requests_total</code> — Quantas requisições processadas?</li>
+        <li><code>request_duration_seconds</code> — Quanto tempo leva?</li>
+        <li><code>cpu_usage_percent</code> — Quanto de CPU está usando?</li>
+        <li><code>memory_bytes</code> — Quanto de memória?</li>
+        <li><code>database_connections_active</code> — Quantas conexões DB abertas?</li>
+      </ul>
+    </section>
+
+    <section class="content-section">
+      <h2>Logs vs Métricas vs Traces</h2>
+      <table class="comparison-table">
+        <tr>
+          <th>Aspecto</th>
+          <th>Logs</th>
+          <th>Métricas</th>
+          <th>Traces</th>
+        </tr>
+        <tr>
+          <td><strong>O quê?</strong></td>
+          <td>Eventos textuais</td>
+          <td>Números quantitativos</td>
+          <td>Fluxo de requisições</td>
+        </tr>
+        <tr>
+          <td><strong>Quando?</strong></td>
+          <td>Quando algo acontece</td>
+          <td>Continuamente (a cada 15s)</td>
+          <td>Início ao fim de request</td>
+        </tr>
+        <tr>
+          <td><strong>Volume</strong></td>
+          <td>Alto (pode ser muito)</td>
+          <td>Menor (agregado)</td>
+          <td>Médio (por requisição)</td>
+        </tr>
+        <tr>
+          <td><strong>Custo</strong></td>
+          <td>Caro (storage)</td>
+          <td>Barato (muito agregado)</td>
+          <td>Médio (amostragem)</td>
+        </tr>
+        <tr>
+          <td><strong>Usar para?</strong></td>
+          <td>Debugging específico</td>
+          <td>Trends e alertas</td>
+          <td>Performance profiling</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="content-section">
+      <h2>Tipos de Métricas (Prometheus)</h2>
+      <div class="metrics-types">
+        <div class="metric-type">
+          <h3>Counter ⬆️</h3>
+          <p>Número que só aumenta (nunca diminui)</p>
+          <div class="code-block">
+            <pre><code>http_requests_total 1,234,567
+errors_total 234</code></pre>
+          </div>
+          <p class="explanation">Perguntas que responde:</p>
+          <ul>
+            <li>"Quantas requisições no total?"</li>
+            <li>"Quantos erros ocorreram?"</li>
+            <li>"Qual a taxa de erros?" (com <code>rate()</code>)</li>
+          </ul>
+        </div>
+
+        <div class="metric-type">
+          <h3>Gauge 📊</h3>
+          <p>Número que sobe e desce (estado atual)</p>
+          <div class="code-block">
+            <pre><code>memory_bytes_used 1,073,741,824
+cpu_percent 45.2
+active_connections 234</code></pre>
+          </div>
+          <p class="explanation">Perguntas que responde:</p>
+          <ul>
+            <li>"Quanto de memória está sendo usado?"</li>
+            <li>"Qual é a temperatura da CPU?"</li>
+            <li>"Quantas conexões ativas?"</li>
+          </ul>
+        </div>
+
+        <div class="metric-type">
+          <h3>Histogram 📈</h3>
+          <p>Distribuição de valores (para percentis)</p>
+          <div class="code-block">
+            <pre><code>request_duration_seconds_bucket{le="0.1"} 100
+request_duration_seconds_bucket{le="0.5"} 250
+request_duration_seconds_bucket{le="1"} 300</code></pre>
+          </div>
+          <p class="explanation">Perguntas que responde:</p>
+          <ul>
+            <li>"Qual é o p95 de latência?"</li>
+            <li>"Que % de requisições é mais rápido que 100ms?"</li>
+          </ul>
+        </div>
+
+        <div class="metric-type">
+          <h3>Summary 📌</h3>
+          <p>Similar a histogram, mas com cálculos no cliente</p>
+          <div class="code-block">
+            <pre><code>request_duration_seconds_sum 1234.56
+request_duration_seconds_count 5000
+request_duration_seconds{quantile="0.5"} 0.23</code></pre>
+          </div>
+          <p class="explanation">Quando usar:</p>
+          <ul>
+            <li>Quando precisa de quantis exatos</li>
+            <li>Menos agregável que histogram</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>PromQL — Queryando Métricas</h2>
+      <p>
+        <strong>PromQL</strong> é a linguagem para buscar e manipular métricas em Prometheus.
+        Aqui estão as queries mais úteis:
+      </p>
+      <div class="promql-queries">
+        <div class="query-card">
+          <h3>Taxa de requisições por segundo</h3>
+          <code>rate(http_requests_total[5m])</code>
+          <p>Quanto de tráfego está chegando?</p>
+        </div>
+
+        <div class="query-card">
+          <h3>P95 de latência</h3>
+          <code>histogram_quantile(0.95, request_duration_seconds)</code>
+          <p>95% das requisições são mais rápidas que isto</p>
+        </div>
+
+        <div class="query-card">
+          <h3>Taxa de erro</h3>
+          <code>rate(http_requests_total{status=~'5..'}[5m]) / rate(http_requests_total[5m])</code>
+          <p>Qual % de requisições falha?</p>
+        </div>
+
+        <div class="query-card">
+          <h3>CPU disponível</h3>
+          <code>(100 - node_cpu_seconds_total{mode="idle"}) / 100</code>
+          <p>Qual % de CPU está sendo usado?</p>
+        </div>
+
+        <div class="query-card">
+          <h3>Memória livre</h3>
+          <code>node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes</code>
+          <p>Que % de memória ainda está disponível?</p>
+        </div>
+
+        <div class="query-card">
+          <h3>Comparar 2 versões</h3>
+          <code>rate(http_requests_total{version="1.0"}[5m]) vs rate(http_requests_total{version="2.0"}[5m])</code>
+          <p>A v2.0 está processando mais tráfego?</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Melhores Práticas</h2>
+      <div class="best-practices">
+        <div class="practice-card">
+          <h3>1️⃣ Nomeie Bem</h3>
+          <p>
+            Nomes de métricas devem ser descritivos e seguir convenção:
+          </p>
+          <code>{job}_{subsystem}_{unit}</code>
+          <p>Ex: <code>http_requests_total</code>, <code>database_query_duration_seconds</code></p>
+        </div>
+
+        <div class="practice-card">
+          <h3>2️⃣ Use Labels com Moderação</h3>
+          <p>
+            Labels permitem filtrar. Mas cuidado: muitos labels = explosão cardinálica.
+          </p>
+          <code>http_requests_total{method="POST", status="200", endpoint="/api/users"}</code>
+          <p style="font-size: 0.9em;">❌ Evite: user_id (infinitas combinações)</p>
+        </div>
+
+        <div class="practice-card">
+          <h3>3️⃣ Escolha Intervalo de Scrape</h3>
+          <p>
+            Prometheus coleta métricas a cada X segundos (default: 15s).
+            Mais frequente = mais storage, mas mais precisão.
+          </p>
+          <code>global: { scrape_interval: 15s }</code>
+        </div>
+
+        <div class="practice-card">
+          <h3>4️⃣ Implemente Alertas</h3>
+          <p>
+            Métricas só são úteis se gerar ação. Configure alertas:
+          </p>
+          <code>ALERT HighErrorRate IF rate(errors_total[5m]) > 0.05</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Exemplo Prático: Node.js com prom-client</h2>
+      <div class="code-block">
+        <pre><code class="language-javascript">import client from 'prom-client';
+
+// Criar métricas
+const httpRequestCounter = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total HTTP requests',
+  labelNames: ['method', 'status'],
+});
+
+const requestDuration = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'HTTP request latency',
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2],
+});
+
+// Middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+    httpRequestCounter.labels(req.method, res.statusCode).inc();
+    requestDuration.observe(duration);
+  });
+
+  next();
+});
+
+// Expor métricas
+app.get('/metrics', (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(client.register.metrics());
+});</code></pre>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Stack de Métricas</h2>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h3>Prometheus</h3>
+          <p>Database de time-series, scraping, alerting</p>
+          <code>docker run prom/prometheus</code>
+        </div>
+        <div class="tool-card">
+          <h3>Grafana</h3>
+          <p>Visualização bonita de dashboards</p>
+          <code>docker run grafana/grafana</code>
+        </div>
+        <div class="tool-card">
+          <h3>AlertManager</h3>
+          <p>Roteamento e gerenciamento de alertas</p>
+          <code>docker run prom/alertmanager</code>
+        </div>
+        <div class="tool-card">
+          <h3>Node Exporter</h3>
+          <p>Exporta métricas de hardware/SO</p>
+          <code>docker run prom/node-exporter</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="navigation-section">
+      <div class="nav-buttons">
+        <a href="/logs/" class="btn btn-secondary">← Logs</a>
+        <a href="/traces/" class="btn btn-primary">Próximo: Traces →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Marcos Sabatino | Observability Portal</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

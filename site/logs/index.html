@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs — Observability Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">📊 Observability</div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/logs/" class="active">Logs</a></li>
+        <li><a href="/metrics/">Métricas</a></li>
+        <li><a href="/traces/">Traces</a></li>
+        <li><a href="/sre/">SRE</a></li>
+        <li><a href="/architecture/">Arquitetura</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+  </nav>
+
+  <header class="section-hero">
+    <div class="container">
+      <h1>📝 Logs: Os Olhos da Aplicação</h1>
+      <p>Registros estruturados do que realmente acontece no seu sistema</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="content-section">
+      <h2>O que é um Log?</h2>
+      <p>
+        Um <strong>log</strong> é um registro de um evento que ocorreu em sua aplicação em um momento específico.
+        Pode ser um erro crítico, um aviso, uma informação sobre o fluxo normal, ou até debug detalhado.
+      </p>
+      <p>
+        Logs são essenciais para:
+      </p>
+      <ul class="feature-list">
+        <li>🔍 <strong>Investigar erros</strong> — "Por que falhou?"</li>
+        <li>⚡ <strong>Entender performance</strong> — "Qual operação foi lenta?"</li>
+        <li>🛡️ <strong>Detectar problemas de segurança</strong> — "Houve acesso não autorizado?"</li>
+        <li>📊 <strong>Auditar operações</strong> — "Quem fez o quê e quando?"</li>
+      </ul>
+    </section>
+
+    <section class="content-section">
+      <h2>Logs Não-Estruturados (❌ Evite)</h2>
+      <p>
+        Logs em texto livre são difíceis de parsear, buscar e analisar automaticamente:
+      </p>
+      <div class="code-block">
+        <pre><code>2026-05-03 14:23:45 ERROR Failed to connect to database
+2026-05-03 14:23:46 INFO Retrying connection attempt 2
+2026-05-03 14:23:48 ERROR Connection timeout after 5000ms</code></pre>
+      </div>
+      <p class="code-label">❌ Problemas:</p>
+      <ul class="problems-list">
+        <li>Impossível buscar programaticamente</li>
+        <li>Sem contexto estruturado (userId, requestId, etc)</li>
+        <li>Difícil correlacionar com traces e métricas</li>
+        <li>Análise manual e propensa a erros</li>
+      </ul>
+    </section>
+
+    <section class="content-section">
+      <h2>Logs Estruturados (✅ Recomendado)</h2>
+      <p>
+        <strong>Logs estruturados</strong> (geralmente em JSON) contêm campos bem definidos que podem ser
+        processados por máquinas:
+      </p>
+      <div class="code-block">
+        <pre><code class="language-json">{
+  "timestamp": "2026-05-03T14:23:45.123Z",
+  "level": "error",
+  "service": "api-gateway",
+  "message": "Failed to connect to database",
+  "error": {
+    "type": "ConnectionTimeout",
+    "code": "ECONNREFUSED"
+  },
+  "context": {
+    "userId": "usr_12345",
+    "requestId": "req_67890",
+    "environment": "production",
+    "version": "1.2.3"
+  },
+  "duration_ms": 5000,
+  "stack_trace": "at connectDB (database.js:42)"
+}</code></pre>
+      </div>
+      <p class="code-label">✅ Benefícios:</p>
+      <ul class="benefits-list">
+        <li>Estrutura consistente — fácil de parsear</li>
+        <li>Contexto completo — correlação com requests e users</li>
+        <li>Queryável — buscar por `level=error` ou `userId=usr_12345`</li>
+        <li>Agregação — Loki, ELK, Splunk entendem automaticamente</li>
+        <li>Correlação — linkado com traces via `traceId`</li>
+      </ul>
+    </section>
+
+    <section class="content-section">
+      <h2>Melhores Práticas</h2>
+      <div class="best-practices">
+        <div class="practice-card">
+          <h3>1️⃣ Use Logs Estruturados</h3>
+          <p>JSON é o padrão de facto para logs em produção.</p>
+          <code>logger.info({ userId, requestId, action }, "User logged in")</code>
+        </div>
+
+        <div class="practice-card">
+          <h3>2️⃣ Inclua Contexto Suficiente</h3>
+          <p>
+            Sem context, logs são inúteis. Sempre inclua:
+          </p>
+          <ul>
+            <li><code>requestId</code> / <code>traceId</code></li>
+            <li><code>userId</code> ou <code>sessionId</code></li>
+            <li><code>service</code> (qual aplicação?)</li>
+            <li><code>environment</code> (dev, staging, prod?)</li>
+          </ul>
+        </div>
+
+        <div class="practice-card">
+          <h3>3️⃣ Use Níveis Apropriados</h3>
+          <ul>
+            <li><strong>ERROR</strong> — Algo falhou, precisa ação</li>
+            <li><strong>WARN</strong> — Algo estranho, monitorar</li>
+            <li><strong>INFO</strong> — Evento normal (login, compra)</li>
+            <li><strong>DEBUG</strong> — Detalhes para troubleshooting</li>
+          </ul>
+          <p style="font-size: 0.9em; color: var(--text-secondary);">
+            Em produção: INFO ou WARN. DEBUG apenas em staging/dev.
+          </p>
+        </div>
+
+        <div class="practice-card">
+          <h3>4️⃣ Agregue Logs Centralizados</h3>
+          <p>Não leia logs de cada servidor separadamente. Use:</p>
+          <ul>
+            <li><strong>Loki</strong> — Leve, integrada com Grafana</li>
+            <li><strong>ELK Stack</strong> — Elasticsearch, Logstash, Kibana</li>
+            <li><strong>Splunk</strong> — Profissional, pago</li>
+            <li><strong>Datadog</strong> — Cloud, com APM integrado</li>
+          </ul>
+        </div>
+
+        <div class="practice-card">
+          <h3>5️⃣ Correlacione com Traces</h3>
+          <p>Use o mesmo <code>traceId</code> em logs, métricas e traces:</p>
+          <code>logger.info({ traceId: req.id }, msg)</code>
+          <p>Depois você consegue puxar TODOS os logs de um request específico.</p>
+        </div>
+
+        <div class="practice-card">
+          <h3>6️⃣ Cuidado com PII</h3>
+          <p>
+            Nunca logue senhas, tokens ou dados pessoais. Use:
+          </p>
+          <code>password: "[REDACTED]", creditCard: "****1234"</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Exemplo Prático: Node.js com Pino</h2>
+      <p>Aqui está como implementar logs estruturados:</p>
+      <div class="code-block">
+        <pre><code class="language-javascript">import pino from 'pino';
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  base: {
+    service: 'api-gateway',
+    environment: process.env.NODE_ENV,
+    version: '1.0.0'
+  }
+});
+
+// Uso
+app.post('/login', (req, res) => {
+  logger.info(
+    { userId: user.id, email: user.email, method: 'password' },
+    'User login attempt'
+  );
+
+  if (!user.passwordMatch) {
+    logger.warn(
+      { userId: user.id, ip: req.ip },
+      'Login failed: invalid password'
+    );
+  }
+
+  logger.info(
+    { userId: user.id, sessionId: session.id },
+    'User logged in successfully'
+  );
+});</code></pre>
+      </div>
+      <p class="code-label">Resultado em Loki:</p>
+      <div class="code-block">
+        <pre><code>{
+  "timestamp": "...",
+  "level": 30,
+  "service": "api-gateway",
+  "environment": "production",
+  "userId": "usr_123",
+  "sessionId": "sess_456",
+  "msg": "User logged in successfully"
+}</code></pre>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Ferramentas para Logs</h2>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h3>Pino (Node.js)</h3>
+          <p>Logger rápido e minimalista para Node.js</p>
+          <code>npm install pino</code>
+        </div>
+        <div class="tool-card">
+          <h3>Winston (Node.js)</h3>
+          <p>Logger flexível e extensível</p>
+          <code>npm install winston</code>
+        </div>
+        <div class="tool-card">
+          <h3>Loki</h3>
+          <p>Agregação de logs leve, integrada com Grafana</p>
+          <code>docker run grafana/loki</code>
+        </div>
+        <div class="tool-card">
+          <h3>ELK Stack</h3>
+          <p>Elasticsearch + Logstash + Kibana (pesado, poderoso)</p>
+          <code>docker-compose up -d elasticsearch</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="navigation-section">
+      <div class="nav-buttons">
+        <a href="/" class="btn btn-secondary">← Home</a>
+        <a href="/metrics/" class="btn btn-primary">Próximo: Métricas →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Marcos Sabatino | Observability Portal</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

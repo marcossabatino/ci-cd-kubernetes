@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRE & Observabilidade — Observability Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">📊 Observability</div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/logs/">Logs</a></li>
+        <li><a href="/metrics/">Métricas</a></li>
+        <li><a href="/traces/">Traces</a></li>
+        <li><a href="/sre/" class="active">SRE</a></li>
+        <li><a href="/architecture/">Arquitetura</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+  </nav>
+
+  <header class="section-hero">
+    <div class="container">
+      <h1>👨‍💻 SRE: Engenharia de Confiabilidade</h1>
+      <p>Aplicando observabilidade para construir sistemas confiáveis</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="content-section">
+      <h2>O que é um SRE?</h2>
+      <p>
+        <strong>Site Reliability Engineer (SRE)</strong> é um papel criado pelo Google.
+        Não é um DevOps, não é um Ops tradicional — é um <strong>engenheiro de software que trabalha em operações</strong>.
+      </p>
+      <div class="sre-definition">
+        <p class="definition-text">
+          "SRE is what happens when a software engineer is tasked with what is traditionally called operations."
+        </p>
+        <p class="definition-author">— Google</p>
+      </div>
+      <p style="margin-top: 20px;">
+        Enquanto Ops manuais são reativos ("servidor caiu, conserta"), SRE é proativo:
+        <strong>use engenharia para evitar problemas</strong>.
+      </p>
+    </section>
+
+    <section class="content-section">
+      <h2>SRE vs DevOps vs Ops</h2>
+      <table class="comparison-table">
+        <tr>
+          <th>Aspecto</th>
+          <th>Traditional Ops</th>
+          <th>DevOps</th>
+          <th>SRE</th>
+        </tr>
+        <tr>
+          <td><strong>Foco</strong></td>
+          <td>Keep systems running</td>
+          <td>Deploy faster</td>
+          <td>Reliable systems</td>
+        </tr>
+        <tr>
+          <td><strong>Ferramenta preferida</strong></td>
+          <td>Runbooks manuais</td>
+          <td>Ansible, Chef</td>
+          <td>Código, automação</td>
+        </tr>
+        <tr>
+          <td><strong>Resposta a falha</strong></td>
+          <td>Manual (1-2h)</td>
+          <td>Scripted (minutos)</td>
+          <td>Automatizada (segundos)</td>
+        </tr>
+        <tr>
+          <td><strong>Foco em observabilidade</strong></td>
+          <td>Logs básicos</td>
+          <td>Logs + alertas</td>
+          <td>Logs + métricas + traces</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="content-section">
+      <h2>Pilares de SRE</h2>
+      <div class="sre-pillars">
+        <div class="pillar">
+          <h3>1️⃣ Observabilidade</h3>
+          <p>Você só consegue consertar o que consegue ver. Logs, métricas, traces.</p>
+        </div>
+        <div class="pillar">
+          <h3>2️⃣ Automação</h3>
+          <p>Tarefas repetitivas devem ser automatizadas. Deploy, scaling, recovery.</p>
+        </div>
+        <div class="pillar">
+          <h3>3️⃣ Disaster Recovery</h3>
+          <p>Planejar para falhas. Backups, failover, caos engineering.</p>
+        </div>
+        <div class="pillar">
+          <h3>4️⃣ Capacity Planning</h3>
+          <p>Entender crescimento e preparar infraestrutura adequadamente.</p>
+        </div>
+        <div class="pillar">
+          <h3>5️⃣ Change Management</h3>
+          <p>Deploys controlados. Canary releases, blue-green, rollback.</p>
+        </div>
+        <div class="pillar">
+          <h3>6️⃣ Incident Response</h3>
+          <p>Quando falha, responder rápido. Runbooks, escalação, postmortem.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>SLI, SLO, SLA — A Tríade de Confiabilidade</h2>
+      <div class="sli-slo-sla">
+        <div class="sli-card">
+          <h3>SLI (Service Level Indicator)</h3>
+          <p><strong>O que você mede?</strong></p>
+          <p>Uma métrica específica que mostra se seu serviço está saudável.</p>
+          <ul>
+            <li>✅ 99.9% de requests com sucesso</li>
+            <li>✅ p99 latência &lt; 200ms</li>
+            <li>✅ Uptime &gt; 99.95%</li>
+          </ul>
+        </div>
+
+        <div class="slo-card">
+          <h3>SLO (Service Level Objective)</h3>
+          <p><strong>O que você promete?</strong></p>
+          <p>Meta que você se compromete a atingir (baseado em SLI).</p>
+          <ul>
+            <li>✅ 99.9% uptime por mês</li>
+            <li>✅ 99% de requests rápidos</li>
+            <li>✅ Máximo 0.1% de taxa de erro</li>
+          </ul>
+        </div>
+
+        <div class="sla-card">
+          <h3>SLA (Service Level Agreement)</h3>
+          <p><strong>O que você é penalizado?</strong></p>
+          <p>Contrato legal. Se não atingir SLO, há multa/crédito.</p>
+          <ul>
+            <li>❌ Abaixo de 99.5% uptime? Cliente recebe 10% de desconto</li>
+            <li>❌ Latência &gt; 300ms? Multa por indisponibilidade</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Error Budget: Aceitando Falhas</h2>
+      <p>
+        <strong>Error Budget</strong> é a quantidade de falha que você pode ter enquanto ainda atinge seu SLO.
+      </p>
+      <div class="error-budget-example">
+        <p><strong>Se seu SLO é 99.9% uptime por mês (30 dias):</strong></p>
+        <ul>
+          <li>Tempo total no mês: 30 × 24 × 60 = 43,200 minutos</li>
+          <li>Downtime permitido: 43,200 × 0.1% = 43.2 minutos</li>
+          <li>✅ Você pode ter ~43 minutos de downtime/mês</li>
+        </ul>
+        <p style="margin-top: 20px;">
+          <strong>Implicação:</strong> Se você já usou seu budget de 43 minutos neste mês,
+          você é <strong>proibido de fazer deploy</strong> até o próximo mês. Risco demais.
+        </p>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Incident Response (Que fazer quando quebra?)</h2>
+      <div class="incident-steps">
+        <div class="step">
+          <h3>1️⃣ Detecção</h3>
+          <p>Alertas disparam (baseado em métricas/SLI). Slack notifica.</p>
+        </div>
+        <div class="step">
+          <h3>2️⃣ Resposta Imediata</h3>
+          <p>On-call SRE é acionado. Olha logs, métricas, traces.</p>
+        </div>
+        <div class="step">
+          <h3>3️⃣ Mitigação</h3>
+          <p>Rollback de deploy? Reboot? Failover? Ação rápida.</p>
+        </div>
+        <div class="step">
+          <h3>4️⃣ Comunicação</h3>
+          <p>Status page atualizado. Clientes informados.</p>
+        </div>
+        <div class="step">
+          <h3>5️⃣ Postmortem</h3>
+          <p>Depois calmo, análise: "Por que falhou?" "Como evitamos próxima vez?"</p>
+        </div>
+        <div class="step">
+          <h3>6️⃣ Implementar Fix</h3>
+          <p>Feature flag, circuit breaker, scaling automático, etc.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Ferramentas Essenciais de SRE</h2>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h3>Prometheus + Grafana</h3>
+          <p>Observabilidade de métricas</p>
+        </div>
+        <div class="tool-card">
+          <h3>Loki + Promtail</h3>
+          <p>Agregação de logs</p>
+        </div>
+        <div class="tool-card">
+          <h3>Jaeger / Zipkin</h3>
+          <p>Distributed tracing</p>
+        </div>
+        <div class="tool-card">
+          <h3>Kubernetes</h3>
+          <p>Orquestração + self-healing</p>
+        </div>
+        <div class="tool-card">
+          <h3>AlertManager</h3>
+          <p>Roteamento de alertas</p>
+        </div>
+        <div class="tool-card">
+          <h3>Terraform</h3>
+          <p>Infraestrutura automática</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Curiosidade: O Google SRE Book</h2>
+      <p>
+        Google publicou um livro inteiro sobre SRE:
+        <a href="https://sre.google/books/" target="_blank">"Site Reliability Engineering"</a>
+      </p>
+      <p>
+        Tópicos cobertos:
+      </p>
+      <ul class="feature-list">
+        <li>Projeto de sistemas confiáveis</li>
+        <li>Monitoring e observabilidade</li>
+        <li>Automação</li>
+        <li>Release engineering</li>
+        <li>Disaster recovery</li>
+        <li>Incident response</li>
+      </ul>
+      <p style="margin-top: 20px;">
+        <strong>Recomendação:</strong> Se quer aprender SRE a fundo, aquele livro é referência.
+      </p>
+    </section>
+
+    <section class="navigation-section">
+      <div class="nav-buttons">
+        <a href="/traces/" class="btn btn-secondary">← Traces</a>
+        <a href="/architecture/" class="btn btn-primary">Próximo: Arquitetura →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Marcos Sabatino | Observability Portal</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
