@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observability Portal — Logs, Traces & Métricas para SRE</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">📊 Observability</div>
+      <ul class="nav-links">
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/logs/">Logs</a></li>
+        <li><a href="/metrics/">Métricas</a></li>
+        <li><a href="/traces/">Traces</a></li>
+        <li><a href="/sre/">SRE</a></li>
+        <li><a href="/architecture/">Arquitetura</a></li>
+        <li><a href="/about.html">Sobre</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Observabilidade em SRE</h1>
+        <p class="subtitle">Entenda <strong>logs</strong>, <strong>métricas</strong> e <strong>traces</strong> — os pilares da confiabilidade moderna</p>
+        <div class="cta-buttons">
+          <a href="/logs/" class="btn btn-primary">Começar com Logs</a>
+          <a href="/architecture/" class="btn btn-secondary">Ver Arquitetura</a>
+        </div>
+      </div>
+      <div class="hero-graphic">
+        <div class="metrics-visualization">
+          <div class="metric metric-1"></div>
+          <div class="metric metric-2"></div>
+          <div class="metric metric-3"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro container">
+      <h2>Por que Observabilidade?</h2>
+      <p>
+        Um <strong>SRE</strong> (Site Reliability Engineer) não é um DevOps. Um SRE é um engenheiro que acredita
+        que problemas de operações devem ser resolvidos com <strong>engenharia de software</strong>.
+      </p>
+      <p>
+        E observabilidade é a base: <em>você não consegue otimizar o que não consegue medir</em>.
+      </p>
+      <blockquote class="quote">
+        "If you can't measure it, you can't improve it." — Peter Drucker
+      </blockquote>
+    </section>
+
+    <section class="three-pillars">
+      <div class="container">
+        <h2>Os Três Pilares da Observabilidade</h2>
+        <div class="pillars-grid">
+          <div class="pillar-card">
+            <div class="pillar-icon">📝</div>
+            <h3>Logs</h3>
+            <p>Registros detalhados do que acontece em suas aplicações — eventos, erros, transações.</p>
+            <ul class="pillar-features">
+              <li>Estruturados (JSON)</li>
+              <li>Correlacionados (traceId)</li>
+              <li>Agregados (Loki, ELK)</li>
+            </ul>
+            <a href="/logs/" class="pillar-link">Saiba mais →</a>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-icon">📈</div>
+            <h3>Métricas</h3>
+            <p>Medidas quantitativas de comportamento — latência, throughput, CPU, memória, requisições.</p>
+            <ul class="pillar-features">
+              <li>Time-series (Prometheus)</li>
+              <li>Alerting (AlertManager)</li>
+              <li>Dashboards (Grafana)</li>
+            </ul>
+            <a href="/metrics/" class="pillar-link">Saiba mais →</a>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-icon">🔗</div>
+            <h3>Traces</h3>
+            <p>Rastreamento de requisições através de microsserviços — entenda o fluxo completo.</p>
+            <ul class="pillar-features">
+              <li>Distributed (Jaeger)</li>
+              <li>Correlação (traceId)</li>
+              <li>Performance profiling</li>
+            </ul>
+            <a href="/traces/" class="pillar-link">Saiba mais →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="this-site container">
+      <h2>✨ Este Site é um Exemplo Vivo</h2>
+      <p>
+        Enquanto você aprende sobre observabilidade aqui, o próprio site está sendo monitorado com:
+      </p>
+      <ul class="stack-list">
+        <li><strong>Prometheus</strong> — Coletando métricas do nginx</li>
+        <li><strong>Grafana</strong> — Visualizando dashboards em tempo real</li>
+        <li><strong>Loki</strong> — Agregando logs de acesso</li>
+        <li><strong>Kubernetes</strong> — Orquestrando containers</li>
+        <li><strong>Terraform</strong> — Infraestrutura como código</li>
+        <li><strong>GitHub Actions</strong> — CI/CD automático</li>
+      </ul>
+      <p class="highlight">
+        👉 <a href="/architecture/">Veja o dashboard ao vivo e a arquitetura completa</a>
+      </p>
+    </section>
+
+    <section class="four-signals container">
+      <h2>Os Quatro Sinais de Ouro do SRE</h2>
+      <p>
+        Google define essas 4 métricas como as mais importantes para entender a saúde de um serviço:
+      </p>
+      <div class="signals-grid">
+        <div class="signal-card">
+          <div class="signal-number">1</div>
+          <h3>Latência</h3>
+          <p>Quanto tempo leva para atender uma requisição?</p>
+          <code>histogram_quantile(0.95, request_duration_seconds)</code>
+        </div>
+        <div class="signal-card">
+          <div class="signal-number">2</div>
+          <h3>Tráfego</h3>
+          <p>Quantas requisições chegam por segundo?</p>
+          <code>rate(http_requests_total[5m])</code>
+        </div>
+        <div class="signal-card">
+          <div class="signal-number">3</div>
+          <h3>Erros</h3>
+          <p>Qual porcentagem falha?</p>
+          <code>rate(http_requests_total{status=~'5..'}[5m])</code>
+        </div>
+        <div class="signal-card">
+          <div class="signal-number">4</div>
+          <h3>Saturação</h3>
+          <p>Quanto de recurso está sendo usado?</p>
+          <code>node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="getting-started container">
+      <h2>Como Começar?</h2>
+      <ol class="steps">
+        <li>
+          <strong>Compreenda Logs</strong> — Estruturado é melhor
+          <p><a href="/logs/">→ Leia sobre logs</a></p>
+        </li>
+        <li>
+          <strong>Monitore com Métricas</strong> — Prometheus + Grafana
+          <p><a href="/metrics/">→ Aprenda métricas</a></p>
+        </li>
+        <li>
+          <strong>Rastreie Requests</strong> — Distributed tracing
+          <p><a href="/traces/">→ Explore traces</a></p>
+        </li>
+        <li>
+          <strong>Seja um SRE</strong> — Use observabilidade para confiabilidade
+          <p><a href="/sre/">→ Vire um SRE</a></p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="cta-final container">
+      <h3>Pronto para explorar?</h3>
+      <a href="/logs/" class="btn btn-large">Começar Jornada</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Observability Portal</h4>
+          <p>Site educacional sobre observabilidade, logs, métricas e traces para SRE.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Tecnologias</h4>
+          <ul>
+            <li>Kubernetes</li>
+            <li>Prometheus</li>
+            <li>Grafana</li>
+            <li>Terraform</li>
+            <li>GitHub Actions</li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Links</h4>
+          <ul>
+            <li><a href="/architecture/">Arquitetura</a></li>
+            <li><a href="https://github.com/marcossabatino/ci-cd-kubernetes" target="_blank">GitHub</a></li>
+            <li><a href="https://linkedin.com/in/msabatino" target="_blank">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Marcos Sabatino | SRE & DevOps | MIT License</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
