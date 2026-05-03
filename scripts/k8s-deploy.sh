@@ -134,7 +134,7 @@ echo "Waiting for nginx ingress controller to be ready..."
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
-  --timeout=120s 2>/dev/null || print_warning "Ingress controller not fully ready (will retry ingress later)"
+  --timeout=45s 2>/dev/null || print_warning "Ingress controller not fully ready (will retry ingress later)"
 
 # Apply Kubernetes manifests
 print_header "Applying Kubernetes Manifests"
@@ -153,7 +153,7 @@ for manifest in kubernetes/configmap.yaml kubernetes/deployment.yaml kubernetes/
 
     # Retry logic for ingress (webhook may not be ready initially)
     if [[ "$manifest" == *"ingress.yaml"* ]]; then
-      max_retries=5
+      max_retries=3
       retry_count=0
       while [ $retry_count -lt $max_retries ]; do
         if kubectl apply -f "$manifest" 2>&1; then
@@ -162,8 +162,8 @@ for manifest in kubernetes/configmap.yaml kubernetes/deployment.yaml kubernetes/
         else
           retry_count=$((retry_count + 1))
           if [ $retry_count -lt $max_retries ]; then
-            print_warning "Ingress webhook not ready, retrying in 5s... (attempt $retry_count/$max_retries)"
-            sleep 5
+            print_warning "Ingress webhook not ready, retrying in 3s... (attempt $retry_count/$max_retries)"
+            sleep 3
           else
             print_error "Failed to apply ingress after $max_retries attempts"
             exit 1
@@ -186,7 +186,7 @@ kubectl get pods -n observability 2>/dev/null || echo "Pods not yet created"
 print_header "Waiting for Deployments"
 
 echo "Waiting for observability-site deployment..."
-if ! kubectl rollout status deployment/observability-site -n observability --timeout=600s 2>&1; then
+if ! kubectl rollout status deployment/observability-site -n observability --timeout=90s 2>&1; then
   print_warning "Deployment timeout or failed"
   echo ""
   echo "Checking pod status..."
@@ -206,10 +206,10 @@ fi
 print_success "Deployment ready"
 
 echo "Waiting for Prometheus deployment..."
-kubectl rollout status deployment/prometheus -n observability --timeout=120s 2>/dev/null || print_warning "Prometheus taking longer, continuing..."
+kubectl rollout status deployment/prometheus -n observability --timeout=45s 2>/dev/null || print_warning "Prometheus taking longer, continuing..."
 
 echo "Waiting for Grafana deployment..."
-kubectl rollout status deployment/grafana -n observability --timeout=120s 2>/dev/null || print_warning "Grafana taking longer, continuing..."
+kubectl rollout status deployment/grafana -n observability --timeout=45s 2>/dev/null || print_warning "Grafana taking longer, continuing..."
 
 # Get pod status
 print_header "Pod Status"
