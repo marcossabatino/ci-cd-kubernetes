@@ -1,0 +1,50 @@
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+yarn.lock
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Kubernetes
+kubeconfig
+*.yaml.bak
+
+# Logs
+logs/
+*.log
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+tmp/
+temp/
