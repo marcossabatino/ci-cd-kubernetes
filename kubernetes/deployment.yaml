@@ -36,7 +36,6 @@ spec:
       # Pod security context
       securityContext:
         runAsNonRoot: false
-        fsGroup: 101
 
       # Init containers (if needed in future)
       initContainers: []
