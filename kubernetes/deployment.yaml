@@ -103,13 +103,6 @@ spec:
           timeoutSeconds: 3
           failureThreshold: 30       # Allow 30 * 5s = 150s to start
 
-        # Volume mounts
-        volumeMounts:
-        - name: nginx-cache
-          mountPath: /var/cache/nginx
-        - name: nginx-run
-          mountPath: /var/run/nginx
-
         # Security context for container
         securityContext:
           allowPrivilegeEscalation: false
@@ -130,17 +123,6 @@ spec:
       # Pod-level settings
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-
-      # Volumes
-      volumes:
-      - name: nginx-cache
-        emptyDir:
-          medium: Memory
-          sizeLimit: 100Mi
-      - name: nginx-run
-        emptyDir:
-          medium: Memory
-          sizeLimit: 50Mi
 
       # Affinity rules (optional but recommended)
       affinity:
