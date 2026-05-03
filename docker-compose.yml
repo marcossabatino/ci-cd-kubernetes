@@ -1,50 +1,176 @@
 version: '3.8'
 
 services:
-  backend:
+  # ========================================
+  # Main Web Application
+  # ========================================
+  website:
     build:
-      context: ./src/backend
+      context: .
       dockerfile: Dockerfile
-    container_name: devops-orchestrator-backend
+    container_name: observability-site
     ports:
-      - "3001:3001"
+      - "8080:80"
     environment:
-      - NODE_ENV=development
-      - LOG_LEVEL=debug
-      - FRONTEND_URL=http://localhost:3000
-    volumes:
-      - ./src/backend/src:/app/src
-      - ./src/backend/tests:/app/tests
+      - TZ=UTC
+      - NGINX_WORKER_PROCESSES=auto
     networks:
-      - devops
+      - observability
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health/live"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 5s
+    labels:
+      - "observability=true"
+      - "environment=development"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  frontend:
-    build:
-      context: ./src/frontend
-      dockerfile: Dockerfile
-    container_name: devops-orchestrator-frontend
+  # ========================================
+  # Prometheus (Metrics Database)
+  # ========================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: observability-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      - website
+    labels:
+      - "observability=metrics"
+
+  # ========================================
+  # Grafana (Visualization)
+  # ========================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: observability-grafana
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:3001/api
-    depends_on:
-      backend:
-        condition: service_healthy
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     networks:
-      - devops
+      - observability
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 15s
+    depends_on:
+      - prometheus
+    labels:
+      - "observability=visualization"
+
+  # ========================================
+  # Loki (Log Aggregation)
+  # ========================================
+  loki:
+    image: grafana/loki:latest
+    container_name: observability-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      - "observability=logs"
+
+  # ========================================
+  # Promtail (Log Collector)
+  # ========================================
+  promtail:
+    image: grafana/promtail:latest
+    container_name: observability-promtail
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - observability
+    restart: unless-stopped
+    depends_on:
+      - loki
+    labels:
+      - "observability=log-collector"
+
+  # ========================================
+  # Nginx Exporter (Prometheus Metrics from Nginx)
+  # ========================================
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: observability-nginx-exporter
+    ports:
+      - "9113:9113"
+    command:
+      - -nginx.scrape-uri=http://website/nginx_status
+      - -web.telemetry-path=/metrics
+    networks:
+      - observability
+    restart: unless-stopped
+    depends_on:
+      - website
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9113/metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      - "observability=metrics-exporter"
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
 
 networks:
-  devops:
+  observability:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
