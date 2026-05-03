@@ -106,8 +106,20 @@ eval $(minikube -p "$MINIKUBE_PROFILE" docker-env)
 print_info "Using minikube Docker daemon"
 
 echo "Building image..."
-docker build -t observability-site:latest .
+if ! docker build -t observability-site:latest .; then
+  print_error "Docker build failed"
+  exit 1
+fi
 print_success "Image built successfully"
+
+echo "Verifying image exists..."
+if docker images | grep -q observability-site; then
+  IMAGE_SIZE=$(docker images observability-site --format "{{.Size}}")
+  print_success "Image verified: observability-site:latest ($IMAGE_SIZE)"
+else
+  print_error "Image not found after build!"
+  exit 1
+fi
 
 # Create namespace
 print_header "Creating Kubernetes Namespace"
@@ -165,18 +177,39 @@ for manifest in kubernetes/configmap.yaml kubernetes/deployment.yaml kubernetes/
   fi
 done
 
+# Small delay to allow Kubernetes to process manifests
+sleep 3
+echo "Allowing manifests to be processed..."
+kubectl get pods -n observability 2>/dev/null || echo "Pods not yet created"
+
 # Wait for deployments
 print_header "Waiting for Deployments"
 
 echo "Waiting for observability-site deployment..."
-kubectl rollout status deployment/observability-site -n observability --timeout=300s
+if ! kubectl rollout status deployment/observability-site -n observability --timeout=600s 2>&1; then
+  print_warning "Deployment timeout or failed"
+  echo ""
+  echo "Checking pod status..."
+  kubectl get pods -n observability -o wide
+  echo ""
+  echo "Checking pod events and logs..."
+  for pod in $(kubectl get pods -n observability -o name | grep observability-site); do
+    echo "Pod: $pod"
+    kubectl describe "$pod" -n observability | grep -A 5 "Events:"
+    echo "Recent logs:"
+    kubectl logs "$pod" -n observability --tail=20 2>/dev/null || echo "No logs available"
+    echo "---"
+  done
+  print_error "Deployment failed. Check output above for details."
+  exit 1
+fi
 print_success "Deployment ready"
 
 echo "Waiting for Prometheus deployment..."
-kubectl rollout status deployment/prometheus -n observability --timeout=60s || print_warning "Prometheus taking longer"
+kubectl rollout status deployment/prometheus -n observability --timeout=120s 2>/dev/null || print_warning "Prometheus taking longer, continuing..."
 
 echo "Waiting for Grafana deployment..."
-kubectl rollout status deployment/grafana -n observability --timeout=60s || print_warning "Grafana taking longer"
+kubectl rollout status deployment/grafana -n observability --timeout=120s 2>/dev/null || print_warning "Grafana taking longer, continuing..."
 
 # Get pod status
 print_header "Pod Status"
