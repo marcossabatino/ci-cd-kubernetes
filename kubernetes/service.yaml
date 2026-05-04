@@ -12,7 +12,6 @@ metadata:
     description: "ClusterIP service for observability-site deployment"
 spec:
   type: ClusterIP
-  clusterIP: None  # Headless service for DNS SRV records
   selector:
     app: observability-site
     tier: web
