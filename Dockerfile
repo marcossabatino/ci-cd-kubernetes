@@ -8,7 +8,7 @@ COPY site/ .
 # RUN apk add --no-cache node npm && npm run build
 
 # Stage 2: Runtime
-FROM nginx:latest-alpine3.20
+FROM nginx:alpine
 
 # Update packages to patch vulnerabilities
 RUN apk update && apk upgrade --no-cache && \
