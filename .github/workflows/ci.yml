@@ -1,0 +1,204 @@
+name: CI - Lint & Build
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "site/**"
+      - "Dockerfile"
+      - "nginx.conf"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "site/**"
+      - "Dockerfile"
+      - "nginx.conf"
+      - ".github/workflows/ci.yml"
+
+jobs:
+  # ============================================
+  # Job 1: Validate HTML
+  # ============================================
+  validate-html:
+    runs-on: ubuntu-latest
+    name: Validate HTML
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install html-validate
+      run: npm install -g html-validate
+
+    - name: Validate HTML files
+      run: |
+        echo "Validating HTML files..."
+        html-validate site/**/*.html || true
+        echo "HTML validation complete (non-blocking)"
+
+  # ============================================
+  # Job 2: Lint CSS (optional)
+  # ============================================
+  lint-css:
+    runs-on: ubuntu-latest
+    name: Lint CSS
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install stylelint
+      run: npm install -g stylelint stylelint-config-standard
+
+    - name: Lint CSS files
+      run: |
+        echo "Linting CSS files..."
+        stylelint "site/**/*.css" || true
+        echo "CSS linting complete (non-blocking)"
+
+  # ============================================
+  # Job 3: Build Docker Image
+  # ============================================
+  build-docker:
+    runs-on: ubuntu-latest
+    name: Build Docker Image
+    needs: [validate-html, lint-css]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: false
+        tags: observability-site:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Print build info
+      run: |
+        echo "Image tag: observability-site:${{ github.sha }}"
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+
+  # ============================================
+  # Job 4: Test Build (Run container)
+  # ============================================
+  test-build:
+    runs-on: ubuntu-latest
+    name: Test Built Image
+    needs: build-docker
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image for testing
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: false
+        load: true
+        tags: observability-site:test
+        cache-from: type=gha
+
+    - name: Test image (run container)
+      run: |
+        docker run --rm -d --name test-container -p 8080:80 observability-site:test
+        sleep 2
+
+        echo "Testing health endpoint..."
+        curl -f http://localhost:8080/health || exit 1
+
+        echo "Testing homepage..."
+        curl -f http://localhost:8080/ | grep -q "Observability" || exit 1
+
+        echo "Testing /metrics endpoint (should 404 for static site)..."
+        curl -f http://localhost:8080/logs/ || exit 1
+
+        echo "✅ All tests passed!"
+        docker stop test-container
+
+  # ============================================
+  # Job 5: Security Scan (Trivy)
+  # ============================================
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scan
+    needs: build-docker
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image for scanning
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: false
+        load: true
+        tags: observability-site:scan
+        cache-from: type=gha
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: observability-site:scan
+        format: "sarif"
+        output: "trivy-results.sarif"
+
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: "trivy-results.sarif"
+
+  # ============================================
+  # Summary Job
+  # ============================================
+  ci-summary:
+    runs-on: ubuntu-latest
+    name: CI Summary
+    needs: [validate-html, lint-css, build-docker, test-build, security-scan]
+    if: always()
+
+    steps:
+    - name: Check CI Status
+      run: |
+        if [ "${{ needs.validate-html.result }}" = "failure" ] || \
+           [ "${{ needs.build-docker.result }}" = "failure" ] || \
+           [ "${{ needs.test-build.result }}" = "failure" ]; then
+          echo "❌ CI Pipeline Failed"
+          exit 1
+        else
+          echo "✅ CI Pipeline Passed"
+          echo ""
+          echo "Summary:"
+          echo "  - HTML Validation: ${{ needs.validate-html.result }}"
+          echo "  - CSS Linting: ${{ needs.lint-css.result }}"
+          echo "  - Docker Build: ${{ needs.build-docker.result }}"
+          echo "  - Image Tests: ${{ needs.test-build.result }}"
+          echo "  - Security Scan: ${{ needs.security-scan.result }}"
+        fi

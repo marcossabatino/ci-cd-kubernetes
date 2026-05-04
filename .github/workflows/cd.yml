@@ -1,0 +1,136 @@
+name: CD - Build & Push Image
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "site/**"
+      - "Dockerfile"
+      - "nginx.conf"
+      - ".github/workflows/cd.yml"
+      - "helm/**"
+    tags:
+      - "v*.*.*"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ============================================
+  # Job: Build & Push to Registry
+  # ============================================
+  build-and-push:
+    runs-on: ubuntu-latest
+    name: Build & Push Docker Image
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Image digest
+      run: echo ${{ steps.build.outputs.digest }}
+
+  # ============================================
+  # Job: Create GitHub Release
+  # ============================================
+  create-release:
+    runs-on: ubuntu-latest
+    name: Create GitHub Release
+    needs: build-and-push
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create Release Notes
+      id: release_notes
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+        # Extract from CHANGELOG if exists
+        if [ -f CHANGELOG.md ]; then
+          sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 > release_notes.txt
+        else
+          echo "Release $VERSION - Observability Site" > release_notes.txt
+          echo "" >> release_notes.txt
+          echo "**Docker Image:** \`${{ needs.build-and-push.outputs.image-tag }}\`" >> release_notes.txt
+          echo "" >> release_notes.txt
+          echo "**Digest:** \`${{ needs.build-and-push.outputs.image-digest }}\`" >> release_notes.txt
+        fi
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body_path: release_notes.txt
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Notification
+  # ============================================
+  notify:
+    runs-on: ubuntu-latest
+    name: Send Notification
+    needs: build-and-push
+    if: always()
+
+    steps:
+    - name: Build Status
+      run: |
+        if [ "${{ needs.build-and-push.result }}" = "success" ]; then
+          echo "✅ Image pushed successfully"
+          echo ""
+          echo "Registry: ${{ env.REGISTRY }}"
+          echo "Repository: ${{ env.IMAGE_NAME }}"
+          echo "Digest: ${{ needs.build-and-push.outputs.image-digest }}"
+        else
+          echo "❌ Image push failed"
+          exit 1
+        fi
