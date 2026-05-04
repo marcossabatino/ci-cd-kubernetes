@@ -1,5 +1,8 @@
 name: CI - Lint & Build
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches: ["**"]
@@ -145,6 +148,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Security Scan
     needs: build-docker
+    permissions:
+      security-events: write
+      contents: read
 
     steps:
     - name: Checkout code
@@ -163,7 +169,7 @@ jobs:
         cache-from: type=gha
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.21.0
       with:
         image-ref: observability-site:scan
         format: "sarif"
@@ -172,7 +178,7 @@ jobs:
         exit-code: "1"
 
     - name: Upload Trivy results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: "trivy-results.sarif"

@@ -18,7 +18,7 @@
         <li><a href="/sre/">SRE</a></li>
         <li><a href="/architecture/">Arquitetura</a></li>
       </ul>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
+      <button type="button" class="theme-toggle" id="themeToggle">🌙</button>
     </div>
   </nav>
 
@@ -132,7 +132,7 @@
             <li><strong>INFO</strong> — Evento normal (login, compra)</li>
             <li><strong>DEBUG</strong> — Detalhes para troubleshooting</li>
           </ul>
-          <p style="font-size: 0.9em; color: var(--text-secondary);">
+          <p class="small-text">
             Em produção: INFO ou WARN. DEBUG apenas em staging/dev.
           </p>
         </div>
@@ -181,7 +181,7 @@ const logger = pino({
 });
 
 // Uso
-app.post('/login', (req, res) => {
+app.post('/login', (req, res) =&gt; {
   logger.info(
     { userId: user.id, email: user.email, method: 'password' },
     'User login attempt'

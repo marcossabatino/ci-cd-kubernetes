@@ -18,7 +18,7 @@
         <li><a href="/sre/">SRE</a></li>
         <li><a href="/architecture/" class="active">Arquitetura</a></li>
       </ul>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
+      <button type="button" class="theme-toggle" id="themeToggle">🌙</button>
     </div>
   </nav>
 
@@ -71,7 +71,7 @@
             <span>→</span>
             <div class="box">Ingress</div>
           </div>
-          <p style="text-align: center; margin-top: 10px; font-size: 0.9em;">
+          <p class="diagram-note">
             Kubernetes escalona automaticamente (HPA: 2-10 réplicas)
           </p>
         </div>
@@ -130,56 +130,60 @@
     <section class="content-section">
       <h2>Tecnologias Usadas</h2>
       <table class="tech-table">
-        <tr>
-          <th>Camada</th>
-          <th>Tecnologia</th>
-          <th>Função</th>
-        </tr>
-        <tr>
-          <td><strong>Frontend</strong></td>
-          <td>HTML5 + CSS3 + Vanilla JS</td>
-          <td>Site estático</td>
-        </tr>
-        <tr>
-          <td><strong>Web Server</strong></td>
-          <td>Nginx</td>
-          <td>Servir conteúdo estático + cache</td>
-        </tr>
-        <tr>
-          <td><strong>Container</strong></td>
-          <td>Docker (Alpine)</td>
-          <td>Imagem otimizada (~30MB)</td>
-        </tr>
-        <tr>
-          <td><strong>Orquestração</strong></td>
-          <td>Kubernetes</td>
-          <td>Auto-scaling, health checks, rolling updates</td>
-        </tr>
-        <tr>
-          <td><strong>IaC</strong></td>
-          <td>Terraform + Helm</td>
-          <td>Infraestrutura versionada</td>
-        </tr>
-        <tr>
-          <td><strong>CI/CD</strong></td>
-          <td>GitHub Actions</td>
-          <td>Build, test, deploy automático</td>
-        </tr>
-        <tr>
-          <td><strong>Logs</strong></td>
-          <td>Loki + Promtail</td>
-          <td>Agregação e busca</td>
-        </tr>
-        <tr>
-          <td><strong>Métricas</strong></td>
-          <td>Prometheus + nginx_exporter</td>
-          <td>Time-series e alerting</td>
-        </tr>
-        <tr>
-          <td><strong>Visualização</strong></td>
-          <td>Grafana</td>
-          <td>Dashboards interativos</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Camada</th>
+            <th>Tecnologia</th>
+            <th>Função</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Frontend</strong></td>
+            <td>HTML5 + CSS3 + Vanilla JS</td>
+            <td>Site estático</td>
+          </tr>
+          <tr>
+            <td><strong>Web Server</strong></td>
+            <td>Nginx</td>
+            <td>Servir conteúdo estático + cache</td>
+          </tr>
+          <tr>
+            <td><strong>Container</strong></td>
+            <td>Docker (Alpine)</td>
+            <td>Imagem otimizada (~30MB)</td>
+          </tr>
+          <tr>
+            <td><strong>Orquestração</strong></td>
+            <td>Kubernetes</td>
+            <td>Auto-scaling, health checks, rolling updates</td>
+          </tr>
+          <tr>
+            <td><strong>IaC</strong></td>
+            <td>Terraform + Helm</td>
+            <td>Infraestrutura versionada</td>
+          </tr>
+          <tr>
+            <td><strong>CI/CD</strong></td>
+            <td>GitHub Actions</td>
+            <td>Build, test, deploy automático</td>
+          </tr>
+          <tr>
+            <td><strong>Logs</strong></td>
+            <td>Loki + Promtail</td>
+            <td>Agregação e busca</td>
+          </tr>
+          <tr>
+            <td><strong>Métricas</strong></td>
+            <td>Prometheus + nginx_exporter</td>
+            <td>Time-series e alerting</td>
+          </tr>
+          <tr>
+            <td><strong>Visualização</strong></td>
+            <td>Grafana</td>
+            <td>Dashboards interativos</td>
+          </tr>
+        </tbody>
       </table>
     </section>
 
@@ -294,7 +298,7 @@ docker/
   ├── Dockerfile
   └── nginx.conf</code></pre>
       </div>
-      <p style="text-align: center; margin-top: 20px;">
+      <p class="github-link">
         👉 <a href="https://github.com/marcossabatino/ci-cd-kubernetes" target="_blank">Ver no GitHub</a>
       </p>
     </section>

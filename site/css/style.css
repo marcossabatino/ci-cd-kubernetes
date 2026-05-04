@@ -938,6 +938,27 @@ body {
 }
 
 /* ========================================
+   Utility Classes
+   ======================================== */
+
+.small-text {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+}
+
+.diagram-note {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+}
+
+.github-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* ========================================
    Animations
    ======================================== */
 

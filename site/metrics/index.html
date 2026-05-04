@@ -18,7 +18,7 @@
         <li><a href="/sre/">SRE</a></li>
         <li><a href="/architecture/">Arquitetura</a></li>
       </ul>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
+      <button type="button" class="theme-toggle" id="themeToggle">🌙</button>
     </div>
   </nav>
 
@@ -49,42 +49,46 @@
     <section class="content-section">
       <h2>Logs vs Métricas vs Traces</h2>
       <table class="comparison-table">
-        <tr>
-          <th>Aspecto</th>
-          <th>Logs</th>
-          <th>Métricas</th>
-          <th>Traces</th>
-        </tr>
-        <tr>
-          <td><strong>O quê?</strong></td>
-          <td>Eventos textuais</td>
-          <td>Números quantitativos</td>
-          <td>Fluxo de requisições</td>
-        </tr>
-        <tr>
-          <td><strong>Quando?</strong></td>
-          <td>Quando algo acontece</td>
-          <td>Continuamente (a cada 15s)</td>
-          <td>Início ao fim de request</td>
-        </tr>
-        <tr>
-          <td><strong>Volume</strong></td>
-          <td>Alto (pode ser muito)</td>
-          <td>Menor (agregado)</td>
-          <td>Médio (por requisição)</td>
-        </tr>
-        <tr>
-          <td><strong>Custo</strong></td>
-          <td>Caro (storage)</td>
-          <td>Barato (muito agregado)</td>
-          <td>Médio (amostragem)</td>
-        </tr>
-        <tr>
-          <td><strong>Usar para?</strong></td>
-          <td>Debugging específico</td>
-          <td>Trends e alertas</td>
-          <td>Performance profiling</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Aspecto</th>
+            <th>Logs</th>
+            <th>Métricas</th>
+            <th>Traces</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>O quê?</strong></td>
+            <td>Eventos textuais</td>
+            <td>Números quantitativos</td>
+            <td>Fluxo de requisições</td>
+          </tr>
+          <tr>
+            <td><strong>Quando?</strong></td>
+            <td>Quando algo acontece</td>
+            <td>Continuamente (a cada 15s)</td>
+            <td>Início ao fim de request</td>
+          </tr>
+          <tr>
+            <td><strong>Volume</strong></td>
+            <td>Alto (pode ser muito)</td>
+            <td>Menor (agregado)</td>
+            <td>Médio (por requisição)</td>
+          </tr>
+          <tr>
+            <td><strong>Custo</strong></td>
+            <td>Caro (storage)</td>
+            <td>Barato (muito agregado)</td>
+            <td>Médio (amostragem)</td>
+          </tr>
+          <tr>
+            <td><strong>Usar para?</strong></td>
+            <td>Debugging específico</td>
+            <td>Trends e alertas</td>
+            <td>Performance profiling</td>
+          </tr>
+        </tbody>
       </table>
     </section>
 
@@ -217,7 +221,7 @@ request_duration_seconds{quantile="0.5"} 0.23</code></pre>
             Labels permitem filtrar. Mas cuidado: muitos labels = explosão cardinálica.
           </p>
           <code>http_requests_total{method="POST", status="200", endpoint="/api/users"}</code>
-          <p style="font-size: 0.9em;">❌ Evite: user_id (infinitas combinações)</p>
+          <p class="small-text">❌ Evite: user_id (infinitas combinações)</p>
         </div>
 
         <div class="practice-card">
