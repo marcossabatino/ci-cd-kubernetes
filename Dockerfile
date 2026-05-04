@@ -1,5 +1,5 @@
 # Stage 1: Build (copy assets, optimize if needed)
-FROM alpine:3.18 AS builder
+FROM alpine:3.20 AS builder
 
 WORKDIR /build
 COPY site/ .
@@ -8,10 +8,11 @@ COPY site/ .
 # RUN apk add --no-cache node npm && npm run build
 
 # Stage 2: Runtime
-FROM nginx:alpine
+FROM nginx:latest-alpine3.20
 
-# Remove default config
-RUN rm /etc/nginx/conf.d/default.conf
+# Update packages to patch vulnerabilities
+RUN apk update && apk upgrade --no-cache && \
+    rm /etc/nginx/conf.d/default.conf
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
