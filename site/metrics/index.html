@@ -238,7 +238,7 @@ request_duration_seconds{quantile="0.5"} 0.23</code></pre>
           <p>
             Métricas só são úteis se gerar ação. Configure alertas:
           </p>
-          <code>ALERT HighErrorRate IF rate(errors_total[5m]) > 0.05</code>
+          <code>ALERT HighErrorRate IF rate(errors_total[5m]) &gt; 0.05</code>
         </div>
       </div>
     </section>
@@ -262,10 +262,10 @@ const requestDuration = new client.Histogram({
 });
 
 // Middleware
-app.use((req, res, next) => {
+app.use((req, res, next) =&gt; {
   const start = Date.now();
 
-  res.on('finish', () => {
+  res.on('finish', () =&gt; {
     const duration = (Date.now() - start) / 1000;
     httpRequestCounter.labels(req.method, res.statusCode).inc();
     requestDuration.observe(duration);
@@ -275,7 +275,7 @@ app.use((req, res, next) => {
 });
 
 // Expor métricas
-app.get('/metrics', (req, res) => {
+app.get('/metrics', (req, res) =&gt; {
   res.set('Content-Type', client.register.contentType);
   res.end(client.register.metrics());
 });</code></pre>

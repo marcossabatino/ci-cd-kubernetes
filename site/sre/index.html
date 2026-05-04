@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SRE & Observabilidade — Observability Portal</title>
+  <title>SRE &amp; Observabilidade — Observability Portal</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -18,7 +18,7 @@
         <li><a href="/sre/" class="active">SRE</a></li>
         <li><a href="/architecture/">Arquitetura</a></li>
       </ul>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
+      <button type="button" class="theme-toggle" id="themeToggle">🌙</button>
     </div>
   </nav>
 
@@ -42,7 +42,7 @@
         </p>
         <p class="definition-author">— Google</p>
       </div>
-      <p style="margin-top: 20px;">
+      <p class="sre-intro">
         Enquanto Ops manuais são reativos ("servidor caiu, conserta"), SRE é proativo:
         <strong>use engenharia para evitar problemas</strong>.
       </p>
@@ -51,36 +51,40 @@
     <section class="content-section">
       <h2>SRE vs DevOps vs Ops</h2>
       <table class="comparison-table">
-        <tr>
-          <th>Aspecto</th>
-          <th>Traditional Ops</th>
-          <th>DevOps</th>
-          <th>SRE</th>
-        </tr>
-        <tr>
-          <td><strong>Foco</strong></td>
-          <td>Keep systems running</td>
-          <td>Deploy faster</td>
-          <td>Reliable systems</td>
-        </tr>
-        <tr>
-          <td><strong>Ferramenta preferida</strong></td>
-          <td>Runbooks manuais</td>
-          <td>Ansible, Chef</td>
-          <td>Código, automação</td>
-        </tr>
-        <tr>
-          <td><strong>Resposta a falha</strong></td>
-          <td>Manual (1-2h)</td>
-          <td>Scripted (minutos)</td>
-          <td>Automatizada (segundos)</td>
-        </tr>
-        <tr>
-          <td><strong>Foco em observabilidade</strong></td>
-          <td>Logs básicos</td>
-          <td>Logs + alertas</td>
-          <td>Logs + métricas + traces</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Aspecto</th>
+            <th>Traditional Ops</th>
+            <th>DevOps</th>
+            <th>SRE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Foco</strong></td>
+            <td>Keep systems running</td>
+            <td>Deploy faster</td>
+            <td>Reliable systems</td>
+          </tr>
+          <tr>
+            <td><strong>Ferramenta preferida</strong></td>
+            <td>Runbooks manuais</td>
+            <td>Ansible, Chef</td>
+            <td>Código, automação</td>
+          </tr>
+          <tr>
+            <td><strong>Resposta a falha</strong></td>
+            <td>Manual (1-2h)</td>
+            <td>Scripted (minutos)</td>
+            <td>Automatizada (segundos)</td>
+          </tr>
+          <tr>
+            <td><strong>Foco em observabilidade</strong></td>
+            <td>Logs básicos</td>
+            <td>Logs + alertas</td>
+            <td>Logs + métricas + traces</td>
+          </tr>
+        </tbody>
       </table>
     </section>
 
@@ -163,7 +167,7 @@
           <li>Downtime permitido: 43,200 × 0.1% = 43.2 minutos</li>
           <li>✅ Você pode ter ~43 minutos de downtime/mês</li>
         </ul>
-        <p style="margin-top: 20px;">
+        <p class="slo-implication">
           <strong>Implicação:</strong> Se você já usou seu budget de 43 minutos neste mês,
           você é <strong>proibido de fazer deploy</strong> até o próximo mês. Risco demais.
         </p>
@@ -247,7 +251,7 @@
         <li>Disaster recovery</li>
         <li>Incident response</li>
       </ul>
-      <p style="margin-top: 20px;">
+      <p class="book-recommendation">
         <strong>Recomendação:</strong> Se quer aprender SRE a fundo, aquele livro é referência.
       </p>
     </section>
