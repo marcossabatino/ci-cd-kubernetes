@@ -18,7 +18,7 @@
         <li><a href="/sre/">SRE</a></li>
         <li><a href="/architecture/">Arquitetura</a></li>
       </ul>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
+      <button type="button" class="theme-toggle" id="themeToggle">🌙</button>
     </div>
   </nav>
 
@@ -51,32 +51,32 @@
         Imagine que um usuário tenta comprar um item:
       </p>
       <div class="trace-flow">
-        <div class="trace-step" style="width: 10%;">
+        <div class="trace-step trace-step-10">
           <h4>API Gateway</h4>
           <code>50ms</code>
         </div>
         <div class="trace-arrow">→</div>
-        <div class="trace-step" style="width: 20%;">
+        <div class="trace-step trace-step-20">
           <h4>User Service</h4>
           <code>150ms</code>
         </div>
         <div class="trace-arrow">→</div>
-        <div class="trace-step" style="width: 15%;">
+        <div class="trace-step trace-step-15">
           <h4>Inventory</h4>
           <code>120ms</code>
         </div>
         <div class="trace-arrow">→</div>
-        <div class="trace-step" style="width: 25%;">
+        <div class="trace-step trace-step-25">
           <h4>Payment</h4>
           <code>300ms ⚠️</code>
         </div>
         <div class="trace-arrow">→</div>
-        <div class="trace-step" style="width: 15%;">
+        <div class="trace-step trace-step-15">
           <h4>Order DB</h4>
           <code>80ms</code>
         </div>
       </div>
-      <p style="text-align: center; margin-top: 20px;">
+      <p class="trace-summary">
         <strong>Total: ~700ms</strong> | Bottleneck: Payment Service (300ms = 43%)
       </p>
     </section>
@@ -149,7 +149,7 @@
         <li>✅ Compatível com Jaeger, Zipkin, Datadog, etc</li>
         <li>✅ Sem vendor lock-in</li>
       </ul>
-      <p style="margin-top: 20px;">
+      <p class="otel-note">
         Diferente de antes (cada ferramenta tinha seu SDK), agora você instrumenta uma vez com OTel
         e exporta para qualquer backend.
       </p>
@@ -198,7 +198,7 @@ tracerProvider.addSpanProcessor(
 tracerProvider.register();
 
 // Uso em uma rota
-app.get('/api/users/:id', async (req, res) => {
+app.get('/api/users/:id', async (req, res) =&gt; {
   const tracer = trace.getTracer('api-service');
 
   const span = tracer.startSpan('getUser');

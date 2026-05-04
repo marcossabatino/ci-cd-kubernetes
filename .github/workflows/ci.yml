@@ -169,7 +169,7 @@ jobs:
         cache-from: type=gha
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.20.0
+      uses: aquasecurity/trivy-action@master
       with:
         image-ref: observability-site:scan
         format: "sarif"
