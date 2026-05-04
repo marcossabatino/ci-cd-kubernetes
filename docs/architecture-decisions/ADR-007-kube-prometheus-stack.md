@@ -4,7 +4,7 @@
 
 ## Context
 
-Portfolio should demonstrate observability (logs, metrics, traces) via Prometheus, Grafana, and Loki. These are industry-standard tools requiring:
+This platform should demonstrate observability (logs, metrics, traces) via Prometheus, Grafana, and Loki. These are industry-standard tools requiring:
 - Prometheus: time-series database + scrape configs + alert rules
 - Grafana: visualization server + datasource config + dashboards
 - Loki: log aggregation + Promtail DaemonSet + log shipper config
@@ -61,11 +61,11 @@ These are pulled via `helm dependency update` in Chart.yaml.
 
 2. **Datadog** — Managed observability platform
    - Pros: SaaS (no ops), powerful features, support included
-   - Cons: Paid ($$), closed ecosystem, not suitable for learning portfolio
+   - Cons: Paid ($$), closed ecosystem, not cost-effective for this project
 
 3. **New Relic** — Managed APM platform
    - Pros: Easy setup, full-stack monitoring
-   - Cons: Paid, closed ecosystem, overkill for this portfolio
+   - Cons: Paid, closed ecosystem, overkill for open-source requirements
 
 4. **Victoria Metrics** — High-performance Prometheus alternative
    - Pros: Better performance and compression than Prometheus
@@ -73,11 +73,11 @@ These are pulled via `helm dependency update` in Chart.yaml.
 
 5. **ELK Stack (Elasticsearch/Logstash/Kibana)** — For logs
    - Pros: Powerful log analysis
-   - Cons: Heavier than Loki, requires more infrastructure, overkill for this portfolio
+   - Cons: Heavier than Loki, requires more infrastructure, over-engineered for this use case
 
 6. **Splunk** — Enterprise observability platform
    - Pros: Powerful, mature
-   - Cons: Expensive, closed ecosystem, not educational
+   - Cons: Expensive, closed ecosystem, not aligned with open-source goals
 
 ## Related Decisions
 

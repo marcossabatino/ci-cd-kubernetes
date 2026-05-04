@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.8.0] — 2026-05-03
 
-### Phase 8: Portfolio Documentation
+### Phase 8: Complete Documentation
 
 **Added**
 - Complete root README.md with project overview, architecture diagram, technology stack justification
@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Phase summary table (8 phases with status and deliverables)
 - Technology stack justifications (Docker, Kubernetes, Helm, Terraform, GitHub Actions, GHCR, Prometheus, Grafana, Loki)
 - 4 deployment options documented (Docker Compose, Kubernetes, Helm, Terraform+Localstack)
-- Learning outcomes section for portfolio learners
+- Learning outcomes section for users exploring the platform
 - Links to all sub-README files
 
 ## [0.7.0] — 2026-04-29
@@ -239,7 +239,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - metrics/index.html: Metrics concept guide (counters, gauges, histograms)
   - traces/index.html: Traces concept guide (distributed tracing, OpenTelemetry)
   - sre/index.html: SRE principles (SLOs, SLIs, incident response)
-  - architecture/index.html: Portfolio architecture overview
+  - architecture/index.html: Platform architecture overview
 - site/css/style.css: Responsive design
   - Utility classes for spacing, text styling
   - Mobile-first media queries (@media (max-width: 768px))

@@ -4,7 +4,7 @@
 
 ## Context
 
-Portfolio should demonstrate Infrastructure as Code (IaC) using Terraform. However, deploying to real AWS requires:
+This project should demonstrate Infrastructure as Code (IaC) using Terraform. However, deploying to real AWS requires:
 - AWS account (personal/educational accounts have limits)
 - Ongoing costs (EC2, storage, data transfer)
 - Risk of leaked credentials
@@ -25,9 +25,9 @@ Architecture simulated:
 
 ## Rationale
 
-1. **IaC portfolio value**: Demonstrates Terraform modules, state management, and AWS patterns without real costs.
+1. **Production-grade IaC**: Demonstrates real Terraform modules, state management, and AWS patterns without real cloud costs.
 2. **Cost-free**: Localstack runs in Docker; no AWS charges.
-3. **Identical code**: Real Terraform code; only endpoint configuration differs. Portfolio demonstrates production-ready IaC.
+3. **Identical code**: Real Terraform code; only endpoint configuration differs. This approach demonstrates production-ready IaC patterns.
 4. **Educational**: Learners can practice AWS without account/cost barriers.
 5. **Fast iteration**: Local infrastructure is instant; no waiting for AWS API.
 6. **Security**: No real AWS credentials needed; no risk of infrastructure leakage.
@@ -73,7 +73,7 @@ Architecture simulated:
 
 5. **Docker Compose only (no IaC)** — Skip Terraform entirely
    - Pros: Simpler, fewer tools to learn
-   - Cons: Portfolio incomplete (IaC is critical DevOps skill); doesn't demonstrate Terraform patterns
+   - Cons: Missing infrastructure automation (IaC is critical DevOps skill); doesn't demonstrate Terraform patterns
 
 ## Related Decisions
 

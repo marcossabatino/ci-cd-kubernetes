@@ -22,7 +22,7 @@ Use **Minikube with QEMU driver** for local Kubernetes development.
 4. **Easy startup/cleanup**: `minikube start` and `minikube delete` manage the full lifecycle.
 5. **Kubectl compatibility**: Uses standard kubectl; no learning curve.
 6. **Addon support**: Minikube addons provide Ingress, metrics-server, storage provisioning out-of-the-box.
-7. **Sufficient for portfolio**: Single-node cluster is adequate for learning Kubernetes patterns; not production-scale.
+7. **Sufficient for development**: Single-node cluster is adequate for development, testing, and demonstrating Kubernetes patterns; not intended for production-scale workloads.
 
 ## Consequences
 

@@ -1,4 +1,4 @@
-# 📚 Observability Portal — DevOps Portfolio Project
+# 📚 Observability Platform — Production-Grade Implementation
 
 ![CI](https://img.shields.io/github/actions/workflow/status/marcossabatino/ci-cd-kubernetes/ci.yml?branch=main&logo=github&label=CI)
 ![CD](https://img.shields.io/github/actions/workflow/status/marcossabatino/ci-cd-kubernetes/cd.yml?branch=main&logo=github&label=CD)
@@ -6,11 +6,11 @@
 ![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**A complete, production-ready DevOps portfolio demonstrating modern cloud-native practices with Kubernetes, Helm, Terraform, and CI/CD.**
+**A production-ready observability platform demonstrating modern cloud-native practices with Kubernetes, Helm, Terraform, and CI/CD.**
 
 ## 🎯 Project Overview
 
-An educational static website about **observability** (logs, metrics, traces) deployed using a complete DevOps stack. This portfolio showcases:
+A static website about **observability** (logs, metrics, traces) deployed using a complete, production-grade DevOps stack. This project demonstrates:
 
 - ✅ **Static Site** — HTML/CSS/JavaScript site explaining observability concepts
 - ✅ **Docker** — Multi-stage builds, security hardening, Alpine optimization
@@ -56,7 +56,7 @@ An educational static website about **observability** (logs, metrics, traces) de
 └────────────────┘          └───────────────────┘
 ```
 
-## 📊 8 Phases — Complete DevOps Portfolio
+## 📊 8 Implementation Phases
 
 | Phase | Name | Status | Key Deliverables |
 |-------|------|--------|------------------|
@@ -67,7 +67,7 @@ An educational static website about **observability** (logs, metrics, traces) de
 | 5️⃣ | **GitHub Actions CI/CD** | ✅ | 3 workflows (ci/cd/deploy), GHCR, security scan |
 | 6️⃣ | **Terraform + Localstack** | ✅ | VPC, ECS, ECR modules, AWS simulation |
 | 7️⃣ | **Observability Stack** | ✅ | Monitoring Helm chart, Prometheus, Grafana, Loki |
-| 8️⃣ | **Portfolio Documentation** | ✅ | ADRs, architecture guide, deployment automation |
+| 8️⃣ | **Complete Documentation** | ✅ | ADRs, architecture guide, deployment automation |
 
 ## 🚀 Quick Start
 
@@ -210,7 +210,7 @@ cd terraform && terraform output
 | **Container Orchestration** | Kubernetes | Production standard, auto-scaling, self-healing |
 | **K8s Package Manager** | Helm | Dev/prod parametrization, dependency management |
 | **Infrastructure as Code** | Terraform | Cloud-agnostic, AWS compatible, Localstack simulation |
-| **Cloud Simulation** | Localstack | Portfolio without AWS costs, full AWS API simulation |
+| **Cloud Simulation** | Localstack | AWS simulation without costs, full AWS API compatibility |
 | **CI/CD Platform** | GitHub Actions | Native GitHub integration, GHCR, free for public repos |
 | **Container Registry** | GitHub Container Registry (GHCR) | GitHub-native, free, no separate Docker Hub account |
 | **Metrics Database** | Prometheus | Industry standard, PromQL, alerting |
@@ -260,11 +260,11 @@ The site teaches observability concepts through interactive pages:
 - **Metrics** — Quantitative measurements, Prometheus types (Counter, Gauge, Histogram)
 - **Traces** — Distributed tracing, following requests across services, OpenTelemetry
 - **SRE** — Site Reliability Engineering, SLOs/SLIs, incident response
-- **Architecture** — How this entire portfolio is deployed across the stack
+- **Architecture** — How this platform is deployed across the entire stack
 
-## 🎓 Learning Outcomes
+## 🎓 Key Takeaways
 
-By exploring this portfolio, you'll understand:
+By using this platform, you'll understand:
 
 ✅ How to containerize applications (Docker multi-stage builds)
 ✅ How to orchestrate containers at scale (Kubernetes)
@@ -323,7 +323,7 @@ kubectl port-forward -n observability svc/monitoring-kube-prometheus-prometheus 
 
 ## 🤝 Contributing
 
-This is a portfolio project showcasing DevOps patterns. Feel free to fork and adapt for your own learning!
+This is an open-source project demonstrating cloud-native and DevOps best practices. Feel free to fork, adapt, and extend for your own use cases!
 
 ## 📝 License
 
@@ -337,4 +337,4 @@ MIT License — See LICENSE file for details.
 
 ---
 
-**Built as a comprehensive DevOps portfolio demonstrating production-ready patterns for containerization, orchestration, infrastructure automation, and observability. 🚀**
+**Production-ready observability platform demonstrating modern patterns for containerization, orchestration, infrastructure automation, and comprehensive monitoring. 🚀**

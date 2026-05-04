@@ -49,7 +49,7 @@ Use **nginx:alpine** as the base image for the Docker container, with a multi-st
 
 3. **Node.js with express** — Application server
    - Pros: Can serve static files + add dynamic endpoints if needed
-   - Cons: 400MB image, slower startup, runtime vulnerabilities, defeats the portfolio focus
+   - Cons: 400MB image, slower startup, runtime vulnerabilities, adds operational complexity
 
 4. **Python SimpleHTTPServer** — Minimal server
    - Pros: Tiny Python image
