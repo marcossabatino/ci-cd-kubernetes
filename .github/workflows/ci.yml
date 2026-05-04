@@ -168,12 +168,24 @@ jobs:
         image-ref: observability-site:scan
         format: "sarif"
         output: "trivy-results.sarif"
+        severity: "HIGH,CRITICAL"
+        exit-code: "1"
 
     - name: Upload Trivy results to GitHub Security
       uses: github/codeql-action/upload-sarif@v2
       if: always()
       with:
         sarif_file: "trivy-results.sarif"
+
+    - name: Trivy vulnerability report
+      if: always()
+      run: |
+        echo "🔍 Security Scan Summary"
+        echo "========================"
+        echo "Severity Filter: HIGH, CRITICAL"
+        echo "Exit Code: 1 (fail on findings)"
+        echo ""
+        echo "ℹ️ Results uploaded to GitHub Security tab"
 
   # ============================================
   # Summary Job
