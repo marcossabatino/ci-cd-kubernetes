@@ -1,0 +1,72 @@
+{{- if .Values.nginxExporter.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "monitoring.fullname" . }}-nginx-exporter
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx-exporter
+spec:
+  replicas: {{ .Values.nginxExporter.replicas }}
+  selector:
+    matchLabels:
+      {{- include "monitoring.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nginx-exporter
+  template:
+    metadata:
+      labels:
+        {{- include "monitoring.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: nginx-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9113"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: {{ include "monitoring.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
+
+      containers:
+      - name: nginx-exporter
+        image: "{{ .Values.nginxExporter.image }}"
+        imagePullPolicy: IfNotPresent
+        args:
+          - "-nginx.scrape-uri={{ .Values.nginxExporter.nginxHost }}/nginx_status"
+          - "-web.telemetry-path=/metrics"
+          - "-web.listen-address=:9113"
+        ports:
+        - name: metrics
+          containerPort: 9113
+          protocol: TCP
+
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        resources:
+          {{- toYaml .Values.nginxExporter.resources | nindent 12 }}
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+{{- end }}

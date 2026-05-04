@@ -1,0 +1,154 @@
+# Monitoring Stack Values (Development)
+
+kubePrometheusStack:
+  enabled: true
+
+  # Prometheus
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      retention: 7d
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+
+      # Service monitors for automatic discovery
+      serviceMonitorSelectorNilUsesHelmValues: false
+      ruleNamespaceSelector: {}
+      ruleSelectorNilUsesHelmValues: false
+
+  # Grafana
+  grafana:
+    enabled: true
+    adminPassword: "admin"
+    persistence:
+      enabled: true
+      size: 5Gi
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - "grafana.observability.local"
+      annotations:
+        kubernetes.io/ingress.class: nginx
+
+    # Datasources and dashboards via provisioning
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            url: http://monitoring-kube-prometheus-prometheus:9090
+            isDefault: true
+            access: proxy
+          - name: Loki
+            type: loki
+            url: http://monitoring-loki:3100
+            access: proxy
+
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: 'default'
+            orgId: 1
+            folder: ''
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+
+    dashboards:
+      default: {}
+
+  # Alertmanager
+  alertmanager:
+    enabled: false
+
+  # Node Exporter
+  nodeExporter:
+    enabled: true
+
+  # Kube State Metrics
+  kubeStateMetrics:
+    enabled: true
+
+  # Prometheus Node Exporter
+  prometheus-node-exporter:
+    enabled: true
+
+lokiStack:
+  enabled: true
+
+  loki:
+    enabled: true
+    persistence:
+      enabled: true
+      size: 5Gi
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    limits_config:
+      retention_period: 24h
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+
+  promtail:
+    enabled: true
+    config:
+      clients:
+        - url: http://monitoring-loki:3100/loki/api/v1/push
+      positions:
+        filename: /tmp/positions.yaml
+      scrape_configs:
+        - job_name: kubernetes-pods
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_label_app]
+              action: replace
+              target_label: app
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: pod
+            - source_labels: [__meta_kubernetes_pod_container_port_name]
+              action: drop
+              regex: ''
+
+# Custom nginx-exporter deployment
+nginxExporter:
+  enabled: true
+  image: nginx/nginx-prometheus-exporter:latest
+  replicas: 1
+  nginxHost: "http://observability-site:80"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Namespace configuration
+namespace:
+  name: observability
+
+# Ingress for Prometheus
+prometheusIngress:
+  enabled: true
+  ingressClassName: nginx
+  hosts:
+    - "prometheus.observability.local"
+  annotations:
+    kubernetes.io/ingress.class: nginx

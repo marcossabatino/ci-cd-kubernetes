@@ -1,0 +1,20 @@
+{{- if .Values.nginxExporter.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "monitoring.fullname" . }}-nginx-exporter
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx-exporter
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9113
+    targetPort: metrics
+    protocol: TCP
+    name: metrics
+  selector:
+    {{- include "monitoring.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx-exporter
+{{- end }}

@@ -1,0 +1,91 @@
+# Monitoring Stack Values (Production)
+
+kubePrometheusStack:
+  enabled: true
+
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      retention: 30d
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 50Gi
+
+  grafana:
+    enabled: true
+    adminPassword: ${GRAFANA_ADMIN_PASSWORD}
+    persistence:
+      enabled: true
+      size: 20Gi
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - "grafana.observability.io"
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      tls:
+        - secretName: grafana-tls
+          hosts:
+            - "grafana.observability.io"
+
+  alertmanager:
+    enabled: true
+    config:
+      global:
+        slack_api_url: ${SLACK_WEBHOOK_URL}
+      route:
+        receiver: 'slack-notifications'
+        group_by: ['alertname', 'cluster']
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 12h
+      receivers:
+        - name: 'slack-notifications'
+          slack_configs:
+            - channel: '#alerts'
+              title: 'Alert: {{ .GroupLabels.alertname }}'
+
+lokiStack:
+  enabled: true
+
+  loki:
+    enabled: true
+    persistence:
+      enabled: true
+      size: 50Gi
+    limits_config:
+      retention_period: 7d
+
+nginxExporter:
+  enabled: true
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+namespace:
+  name: observability-prod
+
+prometheusIngress:
+  enabled: true
+  ingressClassName: nginx
+  hosts:
+    - "prometheus.observability.io"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  tls:
+    - secretName: prometheus-tls
+      hosts:
+        - "prometheus.observability.io"

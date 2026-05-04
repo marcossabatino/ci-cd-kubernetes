@@ -1,0 +1,31 @@
+apiVersion: v2
+name: monitoring
+description: Complete observability stack with Prometheus, Grafana, and Loki for Kubernetes
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://github.com/marcossabatino/ci-cd-kubernetes
+sources:
+  - https://github.com/marcossabatino/ci-cd-kubernetes
+maintainers:
+  - name: Marcos Sabatino
+    email: msabatino@gmail.com
+
+keywords:
+  - observability
+  - prometheus
+  - grafana
+  - loki
+  - monitoring
+  - kubernetes
+
+dependencies:
+  - name: kube-prometheus-stack
+    version: "66.0.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: kubePrometheusStack.enabled
+
+  - name: loki-stack
+    version: "2.10.2"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: lokiStack.enabled
